@@ -36,25 +36,43 @@
        label (e.g. "Apply now"). Leave both blank for a plain announcement.
 
    EVENTS (Events Coordinators)
-     Title | Date | Time | Location | Description | EngageLink | Published
-     - EngageLink: optional. Leave blank if the event isn't on Engage yet.
+     Title | Date | Time | Location | Description | Published
 
    RESEARCH DIRECTORY (Research Coordinators)
-     Deliberately mirrors the columns of the department's own "Research Project
-     Opportunities" tracking sheet, plus a couple of fields the site's UI needs
-     (Subspecialty, Status) that the source sheet doesn't track. A coordinator
-     copying rows over from that sheet should recognize almost every column.
+     Column headers are copied VERBATIM from the faculty member's own "Research
+     Project Opportunities" tab (same tab that appears in the faculty/resident
+     Otolaryngology Research Project Database workbook) — not renamed,
+     not reworded — so this sheet is a genuine mirror of that document, not a
+     lookalike. Three columns are appended at the end that don't exist on the
+     source sheet, purely to power this page's filters and "recruiting" badge;
+     they're clearly separated below so it's obvious what's original and what's
+     site-only.
 
-     Required:  Principal Investigator | Project Title | Description
-     Optional:  Subspecialty | Research Type | Student Role | Time Commitment |
-                Start Date | End Date | Outcomes | Best Contact |
-                Assistant Contact | Status | Updated
+     Required:  Principal Investigator | Project Description
+     Optional (from the source sheet):
+       Best Contact | Assistant Name + Contact Information (if applicable) |
+       Role of Medical Student(s) | Projected Start Date | Projected End Date |
+       Estimated Time Commitment | Projected Student Outcomes
+     Optional (site-only, appended after the columns above):
+       Subspecialty | Research Type | Status
 
-     - Principal Investigator: the faculty/resident/fellow leading the project.
-     - Subspecialty: powers the first row of filter pills on this tab, generated
-       automatically from whatever text appears here — inconsistent spelling
-       (e.g. "Otology" vs "otology") creates duplicate pills. Set a Data
-       Validation dropdown on this column in Google Sheets (Data > Data
+     - Principal Investigator / Project Description: required. Description is
+       shown in full on the card — this doubles as the card's headline since
+       the source sheet has no separate "title" field, so keep the first
+       sentence punchy.
+     - Best Contact: becomes the card's "Reach out" mailto: link.
+     - Assistant Name + Contact Information (if applicable): shown as a small
+       line under the card footer, exactly as typed.
+     - Role of Medical Student(s): what the student would actually spend their
+       time doing.
+     - Projected Start Date / Projected End Date: free text ("ASAP") or a real
+       date — shown as typed, no parsing.
+     - Estimated Time Commitment: free text like "10 hrs/wk," shown as-is.
+     - Projected Student Outcomes: what a student typically gets out of it.
+     - Subspecialty (site-only): powers the first row of filter pills,
+       generated automatically from whatever text appears here — inconsistent
+       spelling (e.g. "Otology" vs "otology") creates duplicate pills. Set a
+       Data Validation dropdown on this column in Google Sheets (Data > Data
        validation > Dropdown, mode "Show a warning") restricted to:
          Otology/Neurotology | Rhinology & Skull Base Surgery | Laryngology |
          Head & Neck Oncologic Surgery | Pediatric Otolaryngology |
@@ -62,24 +80,14 @@
          Otolaryngic Allergy | General/Comprehensive ENT | Other (see description)
        "Show a warning" rather than "Reject input" so a genuinely unusual
        case can still be entered under "Other" without being blocked.
-     - Research Type: powers the second row of filter pills (e.g. "Clinical",
-       "Basic Science", "Translational", "Clinical and Basic Science") — same
-       reasoning as Subspecialty above, matches the Faculty Profiles sheet's
-       "Research Type(s)" column.
-     - Student Role: what the student would actually spend their time doing —
-       matches "Role of Medical Student(s)" on the source sheet.
-     - Time Commitment: free text like "10 hrs/wk" — matches "Estimated Time
-       Commitment" on the source sheet exactly, shown as-is on the card.
-     - Start Date / End Date: matches "Projected Start/End Date." Either can be
-       free text ("ASAP") or a real date — shown as typed, no parsing.
-     - Outcomes: what a student typically gets out of it (e.g. "1st-author
-       abstract, possible manuscript") — matches "Projected Student Outcomes."
-     - Best Contact / Assistant Contact: matches the source sheet's "Best
-       Contact" and "Assistant Name + Contact Information" columns. Best
-       Contact becomes the card's "Reach out" mailto: link.
-     - Status: "Recruiting" or "Not Recruiting" — leave blank to default to
-       Recruiting, so a coordinator only has to touch this to mark something
-       filled without deleting the row.
+     - Research Type (site-only): powers the second row of filter pills (e.g.
+       "Clinical", "Basic Science", "Translational", "Clinical and Basic
+       Science") — borrows its wording from the Faculty Profiles tab's own
+       "Research Type(s)" column, so it's not an invented term, just applied
+       per-project instead of per-faculty.
+     - Status (site-only): "Recruiting" or "Not Recruiting" — leave blank to
+       default to Recruiting, so a coordinator only has to touch this to mark
+       something filled without deleting the row.
 
    SHADOWING (Shadowing/Clinical Coordinators)
      Attending | Specialty | Location | Availability | Description | Contact | Status | Updated
@@ -94,9 +102,6 @@
 
    IDEAS & Q&A (Research Coordinators)
      Question | Answer | Category | Date | Published
-
-   Also set ENGAGE_GROUP_URL near the top of the script — this powers the
-   "See all ENT IG events on Engage" button in the Events tab.
    ============================================================ */
 
   :root{
@@ -328,13 +333,6 @@
   @media (max-width:560px){ .ann-item{ grid-template-columns: 1fr; gap:6px; } .ann-date{ padding-top:0; } }
 
   /* ---------- Events ---------- */
-  .engage-banner{
-    background: var(--green-deep); color:#fff; border-radius: var(--radius);
-    padding: 22px 26px; display:flex; justify-content:space-between; align-items:center;
-    gap: 18px; flex-wrap:wrap; margin-bottom: 26px;
-  }
-  .engage-banner h3{ color:#fff; font-size:16px; margin-bottom:4px; }
-  .engage-banner p{ margin:0; font-size:12.5px; color:#CFE0D6; max-width:420px; line-height:1.5; }
   .btn-primary{
     background: var(--ink); color: var(--paper); text-decoration:none;
     padding: 11px 20px; border-radius: 20px; font-weight:600; font-size:13.5px;
@@ -358,7 +356,6 @@
   .event-title{ font-family:'Archivo', sans-serif; font-size:17px; font-weight:700; letter-spacing:-0.01em; margin-bottom:4px; }
   .event-loc{ font-size:12.5px; color:var(--muted); margin-bottom:8px; }
   .event-desc{ font-size:13.5px; color:var(--muted); line-height:1.55; max-width:520px; }
-  .event-action{ align-self:center; flex-shrink:0; }
 
   /* ---------- About / OHANCAW static ---------- */
   .about-grid{ display:grid; grid-template-columns: 1.3fr 1fr; gap: 40px; }
@@ -420,9 +417,7 @@
     .wrap{ padding: 0 18px; }
     .header-inner{ padding: 36px 0 24px; }
     .search-row{ flex-direction: column; }
-    .engage-banner{ flex-direction:column; align-items:flex-start; }
     .event-card{ flex-direction:column; }
-    .event-action{ align-self:flex-start; }
 
     /* Nav becomes a hamburger-triggered dropdown panel instead of a
        no-affordance horizontal scroll strip. */
@@ -496,7 +491,7 @@
   .nav-dropdown-menu .navlink.active{ background: var(--orange); color:#241000; }
   .navlink.caret::after{ content:"▾"; margin-left:6px; font-size:10px; }
 
-  /* ---------- Submit banner (distinct from Engage banner) ---------- */
+  /* ---------- Submit banner ---------- */
   .submit-banner{
     background: var(--paper-raised); border-left: 3px solid var(--orange);
     box-shadow: var(--card-shadow); border-radius: var(--radius);
@@ -663,7 +658,8 @@
   }
   .copy-btn.copied::after{ opacity:1; }
   .copy-btn.copied{ color: var(--green-deep); }
-  .email-row{ display:flex; align-items:center; gap:6px; }
+  .email-row{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .email-row a{ overflow-wrap:anywhere; }
 
   /* ---------- Sync status ---------- */
   #sync-status{ font-size:11px; color: var(--muted); display:flex; align-items:center; gap:6px; }
@@ -851,15 +847,8 @@
   <section id="panel-events" class="panel" data-folio="02">
     <div class="section-pad">
       <div class="section-head reveal">
-        <div><h2><span class="sec-num">n.02</span>Events</h2><p>What's coming up. RSVP through Engage where available.</p></div>
+        <div><h2><span class="sec-num">n.02</span>Events</h2><p>What's coming up.</p></div>
         <span class="maintainer">Maintained by: Events Coordinators</span>
-      </div>
-      <div class="engage-banner">
-        <div>
-          <h3>Looking for the full calendar?</h3>
-          <p>Every ENT IG event, including ones not itemized here yet, lives on our Engage page.</p>
-        </div>
-        <a class="btn-primary" id="engage-group-link" href="#" target="_blank" rel="noopener">See all events on Engage <svg class="icon-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
       </div>
       <div id="event-list" class="event-list reveal-parent"></div>
     </div>
@@ -1017,34 +1006,42 @@
       </div>
       <div class="contact-grid reveal-parent">
         <div class="contact-card">
-          <span class="role-tag">Research Coordinator</span>
-          <h3 class="placeholder">[PLACEHOLDER — Name]</h3>
-          <p class="placeholder">Research Directory &amp; Ideas/Q&amp;A</p>
-          <div class="email-row"><a href="mailto:PLACEHOLDER@med.miami.edu">PLACEHOLDER@med.miami.edu</a><button class="copy-btn" data-email="PLACEHOLDER@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <span class="role-tag">Co-Presidents</span>
+          <p class="placeholder">Group leadership &amp; general questions</p>
+          <div class="email-row"><strong>Niko Distefano</strong> — <a href="mailto:nvd10@miami.edu">nvd10@miami.edu</a><button class="copy-btn" data-email="nvd10@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <div class="email-row"><strong>Laura Wild</strong> — <a href="mailto:lew126@med.miami.edu">lew126@med.miami.edu</a><button class="copy-btn" data-email="lew126@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
         </div>
         <div class="contact-card">
-          <span class="role-tag">Events Coordinator</span>
-          <h3 class="placeholder">[PLACEHOLDER — Name]</h3>
-          <p class="placeholder">Events &amp; Engage listings</p>
-          <div class="email-row"><a href="mailto:PLACEHOLDER@med.miami.edu">PLACEHOLDER@med.miami.edu</a><button class="copy-btn" data-email="PLACEHOLDER@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <span class="role-tag">Research Coordinators</span>
+          <p class="placeholder">Research Directory &amp; Ideas/Q&amp;A</p>
+          <div class="email-row"><strong>Taylor</strong> — <a href="mailto:tek37@med.miami.edu">tek37@med.miami.edu</a><button class="copy-btn" data-email="tek37@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <div class="email-row"><strong>Ibraheem</strong> — <a href="mailto:ixa588@miami.edu">ixa588@miami.edu</a><button class="copy-btn" data-email="ixa588@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+        </div>
+        <div class="contact-card">
+          <span class="role-tag">Events Coordinators</span>
+          <p class="placeholder">Events</p>
+          <div class="email-row"><strong>Isabella</strong></div>
+          <div class="email-row"><strong>Matthew</strong> — <a href="mailto:mhc129@med.miami.edu">mhc129@med.miami.edu</a><button class="copy-btn" data-email="mhc129@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
         </div>
         <div class="contact-card">
           <span class="role-tag">Shadowing Coordinator</span>
-          <h3 class="placeholder">[PLACEHOLDER — Name]</h3>
           <p class="placeholder">Shadowing opportunities</p>
-          <div class="email-row"><a href="mailto:PLACEHOLDER@med.miami.edu">PLACEHOLDER@med.miami.edu</a><button class="copy-btn" data-email="PLACEHOLDER@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <div class="email-row"><strong>Carlos</strong></div>
         </div>
         <div class="contact-card">
           <span class="role-tag">OHANCAW Committee</span>
-          <h3 class="placeholder">[PLACEHOLDER — Name]</h3>
           <p class="placeholder">OHANCAW planning &amp; volunteering</p>
-          <div class="email-row"><a href="mailto:PLACEHOLDER@med.miami.edu">PLACEHOLDER@med.miami.edu</a><button class="copy-btn" data-email="PLACEHOLDER@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <div class="email-row"><strong>Madison</strong> <small>(Director)</small></div>
+          <div class="email-row"><strong>Eric</strong> <small>(Director)</small> — <a href="mailto:ess139@med.miami.edu">ess139@med.miami.edu</a><button class="copy-btn" data-email="ess139@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <div class="email-row"><strong>Nadine</strong> <small>(Director)</small></div>
+          <div class="email-row"><strong>Andrea</strong> <small>(Navigator)</small> — <a href="mailto:amm7201@med.miami.edu">amm7201@med.miami.edu</a><button class="copy-btn" data-email="amm7201@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <div class="email-row"><strong>Cole</strong> <small>(Navigator)</small></div>
+          <div class="email-row"><strong>Sophia</strong> <small>(Navigator)</small> — <a href="mailto:sij12@med.miami.edu">sij12@med.miami.edu</a><button class="copy-btn" data-email="sij12@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
         </div>
         <div class="contact-card">
-          <span class="role-tag">Communications</span>
-          <h3 class="placeholder">[PLACEHOLDER — Name]</h3>
-          <p class="placeholder">Announcements</p>
-          <div class="email-row"><a href="mailto:PLACEHOLDER@med.miami.edu">PLACEHOLDER@med.miami.edu</a><button class="copy-btn" data-email="PLACEHOLDER@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <span class="role-tag">Social Media</span>
+          <p class="placeholder">Announcements &amp; social media</p>
+          <div class="email-row"><strong>Elizabeth</strong></div>
         </div>
         <div class="contact-card">
           <span class="role-tag">General</span>
@@ -1080,7 +1077,6 @@ const RESEARCH_CSV_URL = "";
 const SHADOWING_CSV_URL = "";
 const OHANCAW_CSV_URL = "";
 const IDEAS_CSV_URL = "";
-const ENGAGE_GROUP_URL = "PLACEHOLDER_ENGAGE_GROUP_URL"; // e.g. https://umiami.campuslabs.com/engage/organization/entig
 
 // ============================================================
 // SAMPLE DATA — shown only until the matching CSV URL above is set
@@ -1091,12 +1087,12 @@ const SAMPLE = {
     {Title:"Welcome back", Body:"Kicking off the year with a general meeting — details on the Events tab.", Date:"Jun 20, 2026", Pinned:"No", Published:"Yes", Link:"", LinkText:""}
   ],
   events: [
-    {Title:"General Body Meeting", Date:"Jul 14, 2026", Time:"6:00 PM", Location:"Room 2001, Miller School", Description:"Intro to the e-board, upcoming research and shadowing opportunities, and free food.", EngageLink:"", Published:"Yes"},
-    {Title:"Suture Skills Workshop", Date:"Jul 22, 2026", Time:"5:30 PM", Location:"Simulation Lab", Description:"Hands-on basic suturing taught by ENT residents. Limited spots — RSVP on Engage.", EngageLink:"PLACEHOLDER_ENGAGE_EVENT_URL", Published:"Yes"}
+    {Title:"General Body Meeting", Date:"Jul 14, 2026", Time:"6:00 PM", Location:"Room 2001, Miller School", Description:"Intro to the e-board, upcoming research and shadowing opportunities, and free food.", Published:"Yes"},
+    {Title:"Suture Skills Workshop", Date:"Jul 22, 2026", Time:"5:30 PM", Location:"Simulation Lab", Description:"Hands-on basic suturing taught by ENT residents. Limited spots.", Published:"Yes"}
   ],
   research: [
-    {"Principal Investigator":"Dr. Yasmin Anis", "Research Type":"Clinical", Subspecialty:"Laryngology", "Project Title":"Vocal fold biomechanics after transoral laser surgery", Description:"Retrospective outcomes analysis of 150 patient charts following transoral laser microsurgery for glottic lesions.", "Student Role":"Chart review, data extraction and cleaning, basic statistical analysis.", "Time Commitment":"8-10 hrs/wk", "Start Date":"ASAP", "End Date":"Dec 2026", Status:"Recruiting", "Best Contact":"anis.lab@example.edu", Updated:"Jun 2026", Outcomes:"Primary author of 1-2 abstract submissions; 1st-author manuscript opportunity"},
-    {"Principal Investigator":"Dr. Marcus Ide", "Research Type":"Clinical and Basic Science", Subspecialty:"Otology/Neurotology", "Project Title":"Cochlear implant candidacy in pediatric single-sided deafness", Description:"Chart review, IRB already approved. Good entry point for an M1.", "Student Role":"Review of clinic notes and audiometric data, REDCap data entry.", "Time Commitment":"5 hrs/wk", "Assistant Contact":"lab.coordinator@example.edu", Status:"Recruiting", "Best Contact":"ide.ent@example.edu", Updated:"May 2026"}
+    {"Principal Investigator":"Dr. Yasmin Anis", "Project Description":"Retrospective outcomes analysis of 150 patient charts following transoral laser microsurgery for glottic lesions.", "Role of Medical Student(s)":"Chart review, data extraction and cleaning, basic statistical analysis.", "Estimated Time Commitment":"8-10 hrs/wk", "Projected Start Date":"ASAP", "Projected End Date":"Dec 2026", "Best Contact":"anis.lab@example.edu", "Projected Student Outcomes":"Primary author of 1-2 abstract submissions; 1st-author manuscript opportunity", "Research Type":"Clinical", Subspecialty:"Laryngology", Status:"Recruiting"},
+    {"Principal Investigator":"Dr. Marcus Ide", "Project Description":"Chart review, IRB already approved. Good entry point for an M1 studying cochlear implant candidacy in pediatric single-sided deafness.", "Role of Medical Student(s)":"Review of clinic notes and audiometric data, REDCap data entry.", "Estimated Time Commitment":"5 hrs/wk", "Assistant Name + Contact Information (if applicable)":"lab.coordinator@example.edu", "Best Contact":"ide.ent@example.edu", "Research Type":"Clinical and Basic Science", Subspecialty:"Otology/Neurotology", Status:"Recruiting"}
   ],
   shadowing: [
     {Attending:"Dr. Priya Chandrasekar", Specialty:"Head & Neck Oncologic Surgery", Location:"Sylvester Cancer Center", Availability:"Tue / Thu clinic", Description:"Clinic + OR days available for M1/M2s. Business casual, arrive 15 min early.", Contact:"chandrasekar.shadow@example.edu", Status:"Open", Updated:"Jun 2026"},
@@ -1110,8 +1106,8 @@ const SAMPLE = {
 
 const FAQ_ITEMS = [
   {q:"How do I actually get involved in a research project?", a:"Email the contact listed on that project's card directly. Mention you saw it on the ENT IG site, briefly describe your background, and ask for 15–20 minutes to talk."},
-  {q:"How do shadowing sign-ups work?", a:"Same idea as research — reach out directly to the attending's listed contact. There's no Engage sign-up for shadowing; it's a direct conversation."},
-  {q:"Where do event RSVPs actually happen?", a:"On Engage. Individual event cards link straight to that event's Engage page when it's live; otherwise use the general Engage link at the top of the Events tab."},
+  {q:"How do shadowing sign-ups work?", a:"Same idea as research — reach out directly to the attending's listed contact. It's a direct conversation, not a form."},
+  {q:"Where do event RSVPs actually happen?", a:"Check the Events tab for each event's details — for now, reach out to the Events Coordinators listed on the Contact page with questions."},
   {q:"How often is any of this actually updated?", a:"Each section pulls live from that department's spreadsheet. Content should reflect changes within a couple weeks."},
   {q:"I don't have research or clinical experience yet. Can I still reach out?", a:"Yes. Listings marked \u201cLow\u201d commitment or general shadowing availability are usually built for first-timers."},
   {q:"Can I suggest an idea that doesn't have a mentor yet?", a:"Yes — use the Ideas & Q&A tab. Coordinators review submissions and may help match it with faculty interest."}
@@ -1294,10 +1290,9 @@ function renderAnnouncements(){
 
 /* ---------------- Events ---------------- */
 function renderEvents(){
-  document.getElementById("engage-group-link").href = ENGAGE_GROUP_URL || "#";
   const rows = DATA.events.filter(r => isYes(r.Published));
   const wrap = document.getElementById("event-list");
-  if(!rows.length){ wrap.innerHTML = `<div class="empty">No upcoming events posted yet — check Engage for the full calendar.</div>`; return; }
+  if(!rows.length){ wrap.innerHTML = `<div class="empty">No upcoming events posted yet — check back soon.</div>`; return; }
   wrap.innerHTML = rows.map(r => `
     <div class="event-card">
       <div>
@@ -1305,9 +1300,6 @@ function renderEvents(){
         <div class="event-title">${esc(r.Title)}</div>
         ${r.Location ? `<div class="event-loc">${esc(r.Location)}</div>` : ""}
         <div class="event-desc">${esc(r.Description)}</div>
-      </div>
-      <div class="event-action">
-        ${r.EngageLink ? `<a class="btn-outline" href="${esc(r.EngageLink)}" target="_blank" rel="noopener">RSVP on Engage ${ARROW}</a>` : `<a class="btn-outline" href="${ENGAGE_GROUP_URL || '#'}" target="_blank" rel="noopener">Find it on Engage ${ARROW}</a>`}
       </div>
     </div>
   `).join("");
@@ -1335,9 +1327,9 @@ function renderResearch(){
     if(researchType && r["Research Type"] !== researchType) return false;
     if(researchSub && r.Subspecialty !== researchSub) return false;
     if(recruitingOnly && !isRecruiting(r.Status)) return false;
-    if(savedOnly && !SAVED.has(listingId("research", r, "Principal Investigator", "Project Title"))) return false;
+    if(savedOnly && !SAVED.has(listingId("research", r, "Principal Investigator", "Project Description"))) return false;
     if(q){
-      const hay = [r["Principal Investigator"], r["Project Title"], r.Description, r.Subspecialty, r["Research Type"]].join(" ").toLowerCase();
+      const hay = [r["Principal Investigator"], r["Project Description"], r.Subspecialty, r["Research Type"]].join(" ").toLowerCase();
       if(!hay.includes(q)) return false;
     }
     return true;
@@ -1347,10 +1339,10 @@ function renderResearch(){
   if(!rows.length){ statusLine.textContent = ""; grid.innerHTML = `<div class="empty">Nothing here yet — you're early, not stuck. Try clearing a filter.</div>`; return; }
   statusLine.textContent = `Showing ${rows.length} of ${DATA.research.length} listings`;
   grid.innerHTML = rows.map((r, i) => {
-    const id = listingId("research", r, "Principal Investigator", "Project Title");
+    const id = listingId("research", r, "Principal Investigator", "Project Description");
     const saved = SAVED.has(id);
     const recruiting = isRecruiting(r.Status);
-    const timeline = [r["Start Date"], r["End Date"]].filter(Boolean).join(" – ");
+    const timeline = [r["Projected Start Date"], r["Projected End Date"]].filter(Boolean).join(" – ");
     return `
     <div class="card" style="--i:${i}">
       <div class="card-top">
@@ -1363,18 +1355,16 @@ function renderResearch(){
       <div class="tag-row">${r.Subspecialty ? `<span class="tag">${esc(r.Subspecialty)}</span>` : ""}</div>
       <div>
         <div class="proj-label">Project</div>
-        <div class="proj-title">${esc(r["Project Title"])||"Untitled project"}</div>
-        <div class="desc">${esc(r.Description)}</div>
-        ${r["Student Role"] ? `<div class="desc" style="margin-top:6px;"><strong>What you'd do:</strong> ${esc(r["Student Role"])}</div>` : ""}
-        ${r.Outcomes ? `<div class="desc" style="margin-top:6px;"><strong>Student outcomes:</strong> ${esc(r.Outcomes)}</div>` : ""}
+        <div class="desc">${esc(r["Project Description"])}</div>
+        ${r["Role of Medical Student(s)"] ? `<div class="desc" style="margin-top:6px;"><strong>What you'd do:</strong> ${esc(r["Role of Medical Student(s)"])}</div>` : ""}
+        ${r["Projected Student Outcomes"] ? `<div class="desc" style="margin-top:6px;"><strong>Student outcomes:</strong> ${esc(r["Projected Student Outcomes"])}</div>` : ""}
       </div>
       <div class="card-foot">
-        ${r["Time Commitment"] ? `<div class="commit"><small>${esc(r["Time Commitment"])}</small></div>` : "<div></div>"}
+        ${r["Estimated Time Commitment"] ? `<div class="commit"><small>${esc(r["Estimated Time Commitment"])}</small></div>` : "<div></div>"}
         ${r["Best Contact"] ? `<div class="email-row"><a class="contact-link" href="mailto:${esc(r["Best Contact"])}">Reach out ${ARROW}</a>${copyBtn(r["Best Contact"])}</div>` : ""}
       </div>
-      ${r["Assistant Contact"] ? `<div class="updated">Assistant: ${esc(r["Assistant Contact"])}</div>` : ""}
+      ${r["Assistant Name + Contact Information (if applicable)"] ? `<div class="updated">Assistant: ${esc(r["Assistant Name + Contact Information (if applicable)"])}</div>` : ""}
       ${timeline ? `<div class="updated">${esc(timeline)}</div>` : ""}
-      ${r.Updated ? `<div class="updated">Updated ${esc(r.Updated)}</div>` : ""}
     </div>
   `;}).join("");
 }
@@ -1660,7 +1650,7 @@ function buildSearchIndex(){
     SEARCH_INDEX.push({section:"Events", panel:"events", title:r.Title||"Untitled", sub:[r.Date, r.Location].filter(Boolean).join(" · ")});
   });
   DATA.research.forEach(r => {
-    SEARCH_INDEX.push({section:"Research", panel:"research", title:r["Project Title"]||r["Principal Investigator"]||"Untitled", sub:[r["Principal Investigator"], r.Subspecialty].filter(Boolean).join(" · ")});
+    SEARCH_INDEX.push({section:"Research", panel:"research", title:r["Principal Investigator"]||"Untitled project", sub:[r.Subspecialty, (r["Project Description"]||"").slice(0,60)].filter(Boolean).join(" · ")});
   });
   DATA.shadowing.forEach(r => {
     SEARCH_INDEX.push({section:"Shadowing", panel:"shadowing", title:r.Attending||"Untitled", sub:[r.Specialty, r.Location].filter(Boolean).join(" · ")});
