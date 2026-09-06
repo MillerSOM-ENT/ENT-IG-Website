@@ -36,7 +36,20 @@
        label (e.g. "Apply now"). Leave both blank for a plain announcement.
 
    EVENTS (Events Coordinators)
-     Title | Date | Time | Location | Description | Published
+     Title | Date | Time | Location | Description | Flyer | Published
+     - Flyer (optional): a link to the event's flyer image, and it shows up
+       as a clickable thumbnail on the event card automatically — no code
+       change needed. The easiest way to get that link:
+         1. Upload the flyer image to Google Drive (any folder you can get
+            back to — a shared "Event Flyers" folder is a good idea).
+         2. Right-click it → Share → under "General access" choose
+            "Anyone with the link" → make sure the role is "Viewer" → Copy link.
+         3. Paste that link into the Flyer cell for that event's row. That's it.
+       A link from anywhere else that points straight at an image file
+       (ends up rendering as a picture when you paste it in a browser) also
+       works fine — Canva's "Share > Download link," Imgur, etc. If the
+       Flyer cell is left blank, the event card just doesn't show a flyer;
+       nothing breaks either way.
 
    RESEARCH DIRECTORY (Research Coordinators)
      Column headers are copied VERBATIM from the faculty member's own "Research
@@ -90,9 +103,55 @@
        something filled without deleting the row.
 
    SHADOWING (Shadowing/Clinical Coordinators)
-     Attending | Specialty | Location | Availability | Description | Contact | Status | Updated
-     - Status: "Open" or "Full"
-     - Specialty: same dropdown list and same reasoning as Subspecialty above.
+     Mirrors the shadowing team's real "Individual Shadowing" sign-up sheet —
+     the same one students already edit directly to claim a slot — column
+     headers copied verbatim, including the literal colon in "Student 1:" and
+     "Student 2:". This is deliberately NOT a separate structured directory:
+     the site reads the live sign-up sheet itself, so "open" here means "a
+     slot on the real sheet is still blank," not a status someone remembered
+     to update.
+
+     Required: Name | Specialty
+     Optional: Comments | Student 1: | Student 2:
+
+     - Name: the attending's name, exactly as coordinators list it.
+     - Specialty: same dropdown list and same reasoning as Subspecialty on the
+       Research Directory above.
+     - Comments: free text — scheduling notes, "reach out directly," CV
+       requirements, recurring clinic days. Shown in full on the card.
+     - Student 1: / Student 2: leave blank for an open slot; a coordinator (or
+       student) fills in a name to claim it, exactly like the real sheet. The
+       site shows "2 of 2 spots open," "1 of 2 spots open," or "Full" based on
+       how many of these two cells have a name in them — never delete a name
+       that's already there, same rule as the sheet itself.
+     - Because real coordinator sheets usually have instructions typed above
+       the header row (exactly like this one does), the site's CSV loader
+       for this section specifically scans down for the row containing
+       "Name" and treats that as the header — rows above it (numbered
+       instructions, "Limit of 2 students per month," etc.) are ignored
+       automatically instead of breaking the import. Every other section
+       still requires the header to be the sheet's very first row.
+
+   ACC EAST SHADOWING (Shadowing Coordinators) — set ACC_EAST_CSV_URL
+     A second, separate mirror for the "ACC East" tab of the same workbook —
+     kept as its own sheet/URL rather than folded into the list above because
+     it's a genuinely different shape: fixed weekly Date+Time slots rather
+     than a per-attending list, so it gets its own section on the Shadowing
+     page instead of being forced into the attending-card grid.
+
+     Required: Time | Name (first last)
+     Optional: Date | Year in school | Email | Cell number
+
+     - Date: only needs to be filled on a slot's FIRST row — a second time
+       slot the same day can leave Date blank, exactly like the real sheet;
+       the site carries the last-seen date forward automatically.
+     - Time / Name (first last): Time is always shown; a blank Name (first
+       last) renders as "Open slot," a filled one shows that student's name.
+     - Year in school / Email / Cell number: shown together under the name
+       once a slot is claimed, exactly as entered.
+     - Uses the same header-row-detection as the sheet above, anchored on
+       the "Date" column, since this sheet also has instructions typed above
+       its real header row.
 
    OHANCAW (OHANCAW Committee)
      Title | Body | Date | Published | Link | LinkText
@@ -176,7 +235,6 @@
     margin: 14px 0 8px;
   }
   .eyebrow::before{ content:""; width: 6px; height: 6px; border-radius: 50%; background: var(--green-deep); display:inline-block; flex-shrink:0; }
-  .hero-num{ font-variant-numeric: tabular-nums; opacity:.6; margin-right:2px; }
   h1.title{ font-size: clamp(42px, 8.5vw, 108px); font-weight:900; line-height: 0.88; letter-spacing:-0.035em; margin: 0; }
   h1.title .char{ will-change: transform, opacity; }
   .sub{ font-size: 15.5px; color: var(--muted); max-width: 620px; line-height:1.6; margin: 22px 0 0; }
@@ -221,15 +279,6 @@
   main{ display:block; }
   .panel{ display:none; position:relative; }
   .panel.active{ display:block; }
-  .panel::before{
-    content: attr(data-folio);
-    position:absolute; top:-10px; right:-8px;
-    font-family: var(--mono); font-weight:500;
-    font-size: clamp(72px, 11vw, 168px); line-height:1;
-    color: var(--green-deep); opacity:.045;
-    pointer-events:none; z-index:0; user-select:none;
-  }
-  @media (max-width:700px){ .panel::before{ display:none; } }
   .section-pad{ position:relative; z-index:1; }
   @media (prefers-reduced-motion: no-preference){
     .panel.active{ animation: panelIn .32s cubic-bezier(.2,.7,.3,1); }
@@ -238,7 +287,6 @@
   .section-pad{ padding: 36px 0 72px; }
   .section-head{ margin-bottom: 24px; display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; }
   .section-head h2{ font-size: 26px; margin-bottom:6px; display:flex; align-items:baseline; gap:12px; }
-  .sec-num{ font-family: var(--mono); font-size:13px; font-weight:500; color: var(--green-deep); opacity:.55; }
   .section-head p{ color: var(--muted); font-size:14px; max-width:640px; line-height:1.6; margin:0; }
   .maintainer{
     font-size: 11px; font-weight:600; color: var(--muted); text-transform:uppercase; letter-spacing:.04em;
@@ -356,6 +404,9 @@
   .event-title{ font-family:'Archivo', sans-serif; font-size:17px; font-weight:700; letter-spacing:-0.01em; margin-bottom:4px; }
   .event-loc{ font-size:12.5px; color:var(--muted); margin-bottom:8px; }
   .event-desc{ font-size:13.5px; color:var(--muted); line-height:1.55; max-width:520px; }
+  .event-flyer{ flex-shrink:0; display:block; width:110px; height:110px; border-radius: var(--radius); overflow:hidden; box-shadow: var(--card-shadow); }
+  .event-flyer img{ width:100%; height:100%; object-fit:cover; display:block; }
+  @media (max-width:520px){ .event-flyer{ width:100%; height:180px; } }
 
   /* ---------- About / OHANCAW static ---------- */
   .about-grid{ display:grid; grid-template-columns: 1.3fr 1fr; gap: 40px; }
@@ -407,7 +458,6 @@
   .contact-card:hover{ box-shadow: 0 4px 8px rgba(20,30,20,.07), 0 10px 24px rgba(20,30,20,.09); }
   .contact-card .role-tag{ font-family:'Archivo', sans-serif; font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color: var(--orange-text); margin-bottom: 8px; display:block; }
   .contact-card h3{ font-size:17px; margin-bottom:4px; }
-  .contact-card .placeholder{ color: var(--muted); font-style:italic; }
   .contact-card a{ display:block; font-size:13px; }
   .contact-card .email-row{ margin-top:10px; }
 
@@ -815,7 +865,7 @@
     <div class="hero-title-wrap">
       <h1 class="title title-a" id="hero-title-a">Home for</h1>
       <div class="hero-title-b-col">
-        <div class="eyebrow"><span id="hero-num" class="hero-num">n.01</span><span id="hero-eyebrow">ENT Interest Group</span></div>
+        <div class="eyebrow"><span id="hero-eyebrow">ENT Interest Group</span></div>
         <h1 class="title title-b" id="hero-title-b">it all.</h1>
       </div>
     </div>
@@ -836,7 +886,7 @@
   <section id="panel-announcements" class="panel active" data-folio="01">
     <div class="section-pad">
       <div class="section-head reveal">
-        <div><h2><span class="sec-num">n.01</span>Announcements</h2><p>Updates from the e-board, in order.</p></div>
+        <div><h2>Announcements</h2><p>Updates from the e-board, in order.</p></div>
         <span class="maintainer">Maintained by: Communications</span>
       </div>
       <div id="ann-list" class="ann-list reveal-parent"></div>
@@ -847,7 +897,7 @@
   <section id="panel-events" class="panel" data-folio="02">
     <div class="section-pad">
       <div class="section-head reveal">
-        <div><h2><span class="sec-num">n.02</span>Events</h2><p>What's coming up.</p></div>
+        <div><h2>Events</h2><p>What's coming up.</p></div>
         <span class="maintainer">Maintained by: Events Coordinators</span>
       </div>
       <div id="event-list" class="event-list reveal-parent"></div>
@@ -858,7 +908,7 @@
   <section id="panel-research" class="panel" data-folio="03">
     <div class="section-pad">
       <div class="section-head reveal">
-        <div><h2><span class="sec-num">n.03</span>Research Directory</h2><p>Faculty, residents, and fellows currently open to student collaborators.</p></div>
+        <div><h2>Research Directory</h2><p>Faculty, residents, and fellows currently open to student collaborators.</p></div>
         <span class="maintainer">Maintained by: Research Coordinators</span>
       </div>
       <div class="controls">
@@ -928,12 +978,19 @@
   <section id="panel-shadowing" class="panel" data-folio="04">
     <div class="section-pad">
       <div class="section-head reveal">
-        <div><h2><span class="sec-num">n.04</span>Shadowing Opportunities</h2><p>Attendings currently open to students shadowing in clinic or OR.</p></div>
+        <div><h2>Shadowing Opportunities</h2><p>Attendings currently open to students shadowing in clinic or OR.</p></div>
         <span class="maintainer">Maintained by: Shadowing Coordinators</span>
+      </div>
+      <div class="submit-banner">
+        <div>
+          <h3>This list mirrors the real sign-up sheet</h3>
+          <p>One student per open slot — please don't overwrite a name that's already there. Reach out to an attending directly to arrange shadowing; when you do, clarify whether you're asking for clinic or OR. To claim a slot, sign up on the shared sheet itself.</p>
+        </div>
+        <a class="btn-outline" href="https://docs.google.com/spreadsheets/d/17bHBnXKuFG-GfYHrNmNDygD2FjkTrd2CbLAxpIFvb6M/edit" target="_blank" rel="noopener">Open the sign-up sheet <svg class="icon-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
       </div>
       <div class="controls">
         <div class="search-row">
-          <input id="shadow-search" type="text" placeholder="Search by name, location, or specialty…" />
+          <input id="shadow-search" type="text" placeholder="Search by name, specialty, or notes…" />
           <label class="toggle"><input type="checkbox" id="shadow-open-only" /> Open only</label>
           <label class="toggle"><input type="checkbox" id="shadow-saved-only" /> Saved only</label>
         </div>
@@ -942,6 +999,18 @@
       </div>
       <div id="shadow-status-line" class="status-line"></div>
       <div id="shadow-grid" class="grid"></div>
+
+      <div class="section-head reveal" style="margin-top:44px;">
+        <div><h3 style="font-family:'Archivo', sans-serif; font-size:20px; font-weight:800;">ACC Clinic East — Thursday shadowing</h3><p>Weekly clinic slots, ACC Clinic East, 3rd Floor. One student per slot.</p></div>
+      </div>
+      <div class="submit-banner">
+        <div>
+          <h3>Before you go</h3>
+          <p>Scrubs required. Fill out the sign-up form at least 3 days before your shadowing date. Questions: Taylor Kring — <a href="mailto:tek37@miami.edu">tek37@miami.edu</a>.</p>
+        </div>
+        <a class="btn-outline" href="https://docs.google.com/forms/d/1YYAWfGdauDFKzofC-XlHpHR05cgWE4xdb3QffdbVVBs/viewform" target="_blank" rel="noopener">Fill out the pre-shadowing form <svg class="icon-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </div>
+      <div id="acc-east-list" class="event-list reveal-parent"></div>
     </div>
   </section>
 
@@ -949,7 +1018,7 @@
   <section id="panel-ohancaw" class="panel" data-folio="05">
     <div class="section-pad">
       <div class="section-head reveal">
-        <div><h2><span class="sec-num">n.05</span>OHANCAW</h2><p>Oral, Head &amp; Neck Cancer Awareness Week.</p></div>
+        <div><h2>OHANCAW</h2><p>Oral, Head &amp; Neck Cancer Awareness Week.</p></div>
         <span class="maintainer">Maintained by: OHANCAW Committee</span>
       </div>
       <div class="placeholder-banner">
@@ -972,7 +1041,7 @@
   <section id="panel-ideas" class="panel" data-folio="06">
     <div class="section-pad">
       <div class="section-head reveal">
-        <div><h2><span class="sec-num">n.06</span>Ideas &amp; Q&amp;A</h2><p>Ask a question or suggest a research idea that doesn't have a mentor yet.</p></div>
+        <div><h2>Ideas &amp; Q&amp;A</h2><p>Ask a question or suggest a research idea that doesn't have a mentor yet.</p></div>
         <span class="maintainer">Maintained by: Research Coordinators</span>
       </div>
       <div class="submit-banner">
@@ -991,7 +1060,7 @@
   <section id="panel-faq" class="panel" data-folio="07">
     <div class="section-pad">
       <div class="section-head reveal">
-        <div><h2><span class="sec-num">n.07</span>Frequently asked questions</h2><p>Click a question to expand it.</p></div>
+        <div><h2>Frequently asked questions</h2><p>Click a question to expand it.</p></div>
         <span class="maintainer">Maintained by: E-board</span>
       </div>
       <div id="faq-list" class="reveal-parent"></div>
@@ -1002,52 +1071,55 @@
   <section id="panel-contact" class="panel" data-folio="08">
     <div class="section-pad">
       <div class="section-head reveal">
-        <div><h2><span class="sec-num">n.08</span>Contact</h2><p>Reach the specific team responsible for each section, or the group generally.</p></div>
+        <div><h2>Contact</h2></div>
       </div>
       <div class="contact-grid reveal-parent">
         <div class="contact-card">
           <span class="role-tag">Co-Presidents</span>
-          <p class="placeholder">Group leadership &amp; general questions</p>
-          <div class="email-row"><strong>Niko Distefano</strong> — <a href="mailto:nvd10@miami.edu">nvd10@miami.edu</a><button class="copy-btn" data-email="nvd10@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
-          <div class="email-row"><strong>Laura Wild</strong> — <a href="mailto:lew126@med.miami.edu">lew126@med.miami.edu</a><button class="copy-btn" data-email="lew126@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <div class="email-row"><strong>Niko DiStefano</strong> — <a href="mailto:nvd10@miami.edu">nvd10@miami.edu</a><button class="copy-btn" data-email="nvd10@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <div class="email-row"><strong>Laura Wild</strong> — <a href="mailto:lew126@miami.edu">lew126@miami.edu</a><button class="copy-btn" data-email="lew126@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+        </div>
+        <div class="contact-card">
+          <span class="role-tag">Vice President</span>
+          <div class="email-row"><strong>Dimitri Godur</strong> — <a href="mailto:dgodur@miami.edu">dgodur@miami.edu</a><button class="copy-btn" data-email="dgodur@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
         </div>
         <div class="contact-card">
           <span class="role-tag">Research Coordinators</span>
-          <p class="placeholder">Research Directory &amp; Ideas/Q&amp;A</p>
-          <div class="email-row"><strong>Taylor</strong> — <a href="mailto:tek37@med.miami.edu">tek37@med.miami.edu</a><button class="copy-btn" data-email="tek37@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
-          <div class="email-row"><strong>Ibraheem</strong> — <a href="mailto:ixa588@miami.edu">ixa588@miami.edu</a><button class="copy-btn" data-email="ixa588@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
-        </div>
-        <div class="contact-card">
-          <span class="role-tag">Events Coordinators</span>
-          <p class="placeholder">Events</p>
-          <div class="email-row"><strong>Isabella</strong></div>
-          <div class="email-row"><strong>Matthew</strong> — <a href="mailto:mhc129@med.miami.edu">mhc129@med.miami.edu</a><button class="copy-btn" data-email="mhc129@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <div class="email-row"><strong>Taylor Kring</strong> — <a href="mailto:tek37@miami.edu">tek37@miami.edu</a><button class="copy-btn" data-email="tek37@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <div class="email-row"><strong>Ibraheem Ahmed</strong> — <a href="mailto:ixa588@miami.edu">ixa588@miami.edu</a><button class="copy-btn" data-email="ixa588@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
         </div>
         <div class="contact-card">
           <span class="role-tag">Shadowing Coordinator</span>
-          <p class="placeholder">Shadowing opportunities</p>
-          <div class="email-row"><strong>Carlos</strong></div>
+          <div class="email-row"><strong>Carlos Lange Nava</strong> — <a href="mailto:cxl1033@miami.edu">cxl1033@miami.edu</a><button class="copy-btn" data-email="cxl1033@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
         </div>
         <div class="contact-card">
-          <span class="role-tag">OHANCAW Committee</span>
-          <p class="placeholder">OHANCAW planning &amp; volunteering</p>
-          <div class="email-row"><strong>Madison</strong> <small>(Director)</small></div>
-          <div class="email-row"><strong>Eric</strong> <small>(Director)</small> — <a href="mailto:ess139@med.miami.edu">ess139@med.miami.edu</a><button class="copy-btn" data-email="ess139@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
-          <div class="email-row"><strong>Nadine</strong> <small>(Director)</small></div>
-          <div class="email-row"><strong>Andrea</strong> <small>(Navigator)</small> — <a href="mailto:amm7201@med.miami.edu">amm7201@med.miami.edu</a><button class="copy-btn" data-email="amm7201@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
-          <div class="email-row"><strong>Cole</strong> <small>(Navigator)</small></div>
-          <div class="email-row"><strong>Sophia</strong> <small>(Navigator)</small> — <a href="mailto:sij12@med.miami.edu">sij12@med.miami.edu</a><button class="copy-btn" data-email="sij12@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <span class="role-tag">Events Coordinators</span>
+          <div class="email-row"><strong>Isabella Guanche</strong> — <a href="mailto:idg18@miami.edu">idg18@miami.edu</a><button class="copy-btn" data-email="idg18@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <div class="email-row"><strong>Matthew Colbert</strong> — <a href="mailto:mhc129@miami.edu">mhc129@miami.edu</a><button class="copy-btn" data-email="mhc129@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
         </div>
         <div class="contact-card">
-          <span class="role-tag">Social Media</span>
-          <p class="placeholder">Announcements &amp; social media</p>
-          <div class="email-row"><strong>Elizabeth</strong></div>
+          <span class="role-tag">OHANCAW Directors</span>
+          <div class="email-row"><strong>Madison Hawthrone</strong> — <a href="mailto:mah399@miami.edu">mah399@miami.edu</a><button class="copy-btn" data-email="mah399@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <div class="email-row"><strong>Eric Sokhn</strong> — <a href="mailto:ess139@miami.edu">ess139@miami.edu</a><button class="copy-btn" data-email="ess139@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <div class="email-row"><strong>Nadine Javier</strong> — <a href="mailto:njavier@miami.edu">njavier@miami.edu</a><button class="copy-btn" data-email="njavier@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
         </div>
         <div class="contact-card">
-          <span class="role-tag">General</span>
-          <h3>ENT Interest Group</h3>
-          <p>General questions about the group or membership.</p>
-          <div class="email-row"><a href="mailto:PLACEHOLDER@med.miami.edu" class="placeholder">PLACEHOLDER@med.miami.edu</a><button class="copy-btn" data-email="PLACEHOLDER@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <span class="role-tag">OHANCAW Navigators &amp; Assistants</span>
+          <div class="email-row"><strong>Cole Miller</strong> — <a href="mailto:cmm666@miami.edu">cmm666@miami.edu</a><button class="copy-btn" data-email="cmm666@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <div class="email-row"><strong>Andrea Monterrubio</strong> — <a href="mailto:amm7201@miami.edu">amm7201@miami.edu</a><button class="copy-btn" data-email="amm7201@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+          <div class="email-row"><strong>Sophia Jaguan</strong> — <a href="mailto:sij12@miami.edu">sij12@miami.edu</a><button class="copy-btn" data-email="sij12@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+        </div>
+        <div class="contact-card">
+          <span class="role-tag">Social Media Coordinator</span>
+          <div class="email-row"><strong>Elizabeth Russ</strong> — <a href="mailto:exr704@miami.edu">exr704@miami.edu</a><button class="copy-btn" data-email="exr704@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+        </div>
+        <div class="contact-card">
+          <span class="role-tag">Treasurer</span>
+          <div class="email-row"><strong>Anya Shroff</strong> — <a href="mailto:axs3211@miami.edu">axs3211@miami.edu</a><button class="copy-btn" data-email="axs3211@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+        </div>
+        <div class="contact-card">
+          <span class="role-tag">Secretary</span>
+          <div class="email-row"><strong>Danielle Abdennour</strong> — <a href="mailto:daa242@miami.edu">daa242@miami.edu</a><button class="copy-btn" data-email="daa242@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
         </div>
       </div>
     </div>
@@ -1074,7 +1146,8 @@
 const ANNOUNCEMENTS_CSV_URL = "";
 const EVENTS_CSV_URL = "";
 const RESEARCH_CSV_URL = "";
-const SHADOWING_CSV_URL = "";
+const SHADOWING_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQaV6v5yUxnfU1puFtBzlkBJhk6cqS9F9tdIS0U0WptiHtvGUhAV7k6QP9Gi4s6VaEC63ZNJpXzyLlq/pub?output=csv";
+const ACC_EAST_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vToNTUSEiFbZmzb1Iit6cRx47fDPPQ2BtCIiu3G1jKiXMg7yBE0RfyRO5kovZT-k96qeH8ZJKmVVz91/pub?output=csv";
 const OHANCAW_CSV_URL = "";
 const IDEAS_CSV_URL = "";
 
@@ -1087,16 +1160,23 @@ const SAMPLE = {
     {Title:"Welcome back", Body:"Kicking off the year with a general meeting — details on the Events tab.", Date:"Jun 20, 2026", Pinned:"No", Published:"Yes", Link:"", LinkText:""}
   ],
   events: [
-    {Title:"General Body Meeting", Date:"Jul 14, 2026", Time:"6:00 PM", Location:"Room 2001, Miller School", Description:"Intro to the e-board, upcoming research and shadowing opportunities, and free food.", Published:"Yes"},
-    {Title:"Suture Skills Workshop", Date:"Jul 22, 2026", Time:"5:30 PM", Location:"Simulation Lab", Description:"Hands-on basic suturing taught by ENT residents. Limited spots.", Published:"Yes"}
+    {Title:"General Body Meeting", Date:"Jul 14, 2026", Time:"6:00 PM", Location:"Room 2001, Miller School", Description:"Intro to the e-board, upcoming research and shadowing opportunities, and free food.", Flyer:"", Published:"Yes"},
+    {Title:"Suture Skills Workshop", Date:"Jul 22, 2026", Time:"5:30 PM", Location:"Simulation Lab", Description:"Hands-on basic suturing taught by ENT residents. Limited spots.", Flyer:"", Published:"Yes"}
   ],
   research: [
     {"Principal Investigator":"Dr. Yasmin Anis", "Project Description":"Retrospective outcomes analysis of 150 patient charts following transoral laser microsurgery for glottic lesions.", "Role of Medical Student(s)":"Chart review, data extraction and cleaning, basic statistical analysis.", "Estimated Time Commitment":"8-10 hrs/wk", "Projected Start Date":"ASAP", "Projected End Date":"Dec 2026", "Best Contact":"anis.lab@example.edu", "Projected Student Outcomes":"Primary author of 1-2 abstract submissions; 1st-author manuscript opportunity", "Research Type":"Clinical", Subspecialty:"Laryngology", Status:"Recruiting"},
     {"Principal Investigator":"Dr. Marcus Ide", "Project Description":"Chart review, IRB already approved. Good entry point for an M1 studying cochlear implant candidacy in pediatric single-sided deafness.", "Role of Medical Student(s)":"Review of clinic notes and audiometric data, REDCap data entry.", "Estimated Time Commitment":"5 hrs/wk", "Assistant Name + Contact Information (if applicable)":"lab.coordinator@example.edu", "Best Contact":"ide.ent@example.edu", "Research Type":"Clinical and Basic Science", Subspecialty:"Otology/Neurotology", Status:"Recruiting"}
   ],
   shadowing: [
-    {Attending:"Dr. Priya Chandrasekar", Specialty:"Head & Neck Oncologic Surgery", Location:"Sylvester Cancer Center", Availability:"Tue / Thu clinic", Description:"Clinic + OR days available for M1/M2s. Business casual, arrive 15 min early.", Contact:"chandrasekar.shadow@example.edu", Status:"Open", Updated:"Jun 2026"},
-    {Attending:"Dr. Owen Farraday", Specialty:"Facial Plastic & Reconstructive Surgery", Location:"Lennar Foundation Medical Center", Availability:"Mon clinic only", Description:"Clinic shadowing only, no OR access currently.", Contact:"farraday.shadow@example.edu", Status:"Full", Updated:"May 2026"}
+    {Name:"Dr. David Arnold", Specialty:"Head and Neck", Comments:"", "Student 1:":"", "Student 2:":""},
+    {Name:"Dr. Erin Kaye", Specialty:"Head and Neck", Comments:"Reach out to her directly", "Student 1:":"", "Student 2:":""},
+    {Name:"Dr. Mursalin Anis", Specialty:"Laryngology and Voice", Comments:"He is selective of observers. Must send CV to him first, then he will decide if you can shadow", "Student 1:":"Jane Doe", "Student 2:":""}
+  ],
+  accEast: [
+    {Date:"Thursday December 4th", Time:"9:00 - 12:00", "Name (first last)":"", "Year in school":"", Email:"", "Cell number":""},
+    {Date:"", Time:"12:30 - 3:30", "Name (first last)":"Jane Doe", "Year in school":"MS2", Email:"janedoe@miami.edu", "Cell number":""},
+    {Date:"Thursday December 11th", Time:"9:00 - 12:00", "Name (first last)":"", "Year in school":"", Email:"", "Cell number":""},
+    {Date:"", Time:"12:30 - 3:30", "Name (first last)":"", "Year in school":"", Email:"", "Cell number":""}
   ],
   ohancaw: [],
   ideas: [
@@ -1115,7 +1195,12 @@ const FAQ_ITEMS = [
 
 let DATA = {};
 
-function parseCSV(text){
+// headerAnchor: for sheets that have instruction rows typed above the real
+// header (coordinators do this a lot — "please don't delete names," etc.),
+// pass the exact text of one header cell (e.g. "Name") and this scans down
+// for the first row containing it, using that as the header row instead of
+// assuming row 1. Every other caller omits it and gets the old row-1 behavior.
+function parseCSV(text, headerAnchor){
   const rows = [];
   let row = [], field = "", inQuotes = false;
   for(let i=0;i<text.length;i++){
@@ -1134,21 +1219,27 @@ function parseCSV(text){
   }
   if(field.length || row.length){ row.push(field); rows.push(row); }
   if(!rows.length) return [];
-  const headers = rows[0].map(h => h.trim());
-  return rows.slice(1).filter(r => r.some(v => v && v.trim())).map(r => {
+  let headerIdx = 0;
+  if(headerAnchor){
+    const anchor = headerAnchor.trim().toLowerCase();
+    const found = rows.findIndex(r => r.some(v => (v || "").trim().toLowerCase() === anchor));
+    if(found !== -1) headerIdx = found;
+  }
+  const headers = rows[headerIdx].map(h => h.trim());
+  return rows.slice(headerIdx + 1).filter(r => r.some(v => v && v.trim())).map(r => {
     const obj = {};
     headers.forEach((h, idx) => obj[h] = (r[idx] || "").trim());
     return obj;
   });
 }
 
-async function loadCSV(url, fallback){
+async function loadCSV(url, fallback, headerAnchor){
   if(url){
     try{
       const res = await fetch(url, {cache:"no-store"});
       if(!res.ok) throw new Error("fetch failed");
       const text = await res.text();
-      const parsed = parseCSV(text);
+      const parsed = parseCSV(text, headerAnchor);
       if(parsed.length) return parsed;
     } catch(e){
       console.warn("Could not load sheet, falling back to sample data.", e);
@@ -1174,6 +1265,9 @@ function statusIs(v, target){ return (v || "").toString().trim().toLowerCase() =
 // the source sheet this mirrors only lists active opportunities, so a
 // coordinator should only have to touch Status to mark one filled.
 function isRecruiting(v){ return !statusIs(v, "Not Recruiting"); }
+// Shadowing has no separate "Status" field — the real sign-up sheet's two
+// name slots ARE the status. A slot counts as open when its cell is blank.
+function openSlotCount(r){ return (r["Student 1:"]?.trim() ? 0 : 1) + (r["Student 2:"]?.trim() ? 0 : 1); }
 function sanitizeUrl(url){
   if(!url) return null;
   const trimmed = url.trim();
@@ -1289,11 +1383,25 @@ function renderAnnouncements(){
 }
 
 /* ---------------- Events ---------------- */
+// Turns a pasted Google Drive "share" link (or any direct image URL) into
+// something usable as an <img src>. Drive's normal share-link format isn't
+// hotlinkable as-is, so we pull the file ID out of it and build Drive's
+// thumbnail endpoint instead. Anything that isn't a recognizable Drive link
+// is assumed to already be a direct image URL and is returned unchanged.
+function driveImageUrl(link){
+  const trimmed = (link || "").trim();
+  if(!trimmed) return "";
+  const m = trimmed.match(/\/d\/([a-zA-Z0-9_-]{15,})/) || trimmed.match(/[?&]id=([a-zA-Z0-9_-]{15,})/);
+  if(m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1000`;
+  return trimmed;
+}
 function renderEvents(){
   const rows = DATA.events.filter(r => isYes(r.Published));
   const wrap = document.getElementById("event-list");
   if(!rows.length){ wrap.innerHTML = `<div class="empty">No upcoming events posted yet — check back soon.</div>`; return; }
-  wrap.innerHTML = rows.map(r => `
+  wrap.innerHTML = rows.map(r => {
+    const flyerSrc = driveImageUrl(r.Flyer);
+    return `
     <div class="event-card">
       <div>
         <div class="event-when">${esc(r.Date)}${r.Time ? " · " + esc(r.Time) : ""}</div>
@@ -1301,8 +1409,9 @@ function renderEvents(){
         ${r.Location ? `<div class="event-loc">${esc(r.Location)}</div>` : ""}
         <div class="event-desc">${esc(r.Description)}</div>
       </div>
+      ${flyerSrc ? `<a class="event-flyer" href="${esc((r.Flyer || "").trim())}" target="_blank" rel="noopener" title="View full flyer"><img src="${esc(flyerSrc)}" alt="${esc(r.Title)} flyer" loading="lazy" onerror="this.closest('.event-flyer').style.display='none'"></a>` : ""}
     </div>
-  `).join("");
+  `;}).join("");
 }
 
 /* ---------------- Research directory ---------------- */
@@ -1410,10 +1519,10 @@ function renderShadowing(){
 
   let rows = DATA.shadowing.filter(r => {
     if(shadowSpec && r.Specialty !== shadowSpec) return false;
-    if(openOnly && !statusIs(r.Status, "Open")) return false;
-    if(savedOnly && !SAVED.has(listingId("shadowing", r, "Attending", "Availability"))) return false;
+    if(openOnly && openSlotCount(r) === 0) return false;
+    if(savedOnly && !SAVED.has(listingId("shadowing", r, "Name", "Specialty"))) return false;
     if(q){
-      const hay = [r.Attending, r.Location, r.Specialty, r.Description].join(" ").toLowerCase();
+      const hay = [r.Name, r.Specialty, r.Comments].join(" ").toLowerCase();
       if(!hay.includes(q)) return false;
     }
     return true;
@@ -1423,27 +1532,26 @@ function renderShadowing(){
   if(!rows.length){ statusLine.textContent = ""; grid.innerHTML = `<div class="empty">Nothing here yet — you're early, not stuck. Try clearing a filter.</div>`; return; }
   statusLine.textContent = `Showing ${rows.length} of ${DATA.shadowing.length} listings`;
   grid.innerHTML = rows.map((r, i) => {
-    const id = listingId("shadowing", r, "Attending", "Availability");
+    const id = listingId("shadowing", r, "Name", "Specialty");
     const saved = SAVED.has(id);
+    const open = openSlotCount(r);
+    const slot1 = (r["Student 1:"] || "").trim();
+    const slot2 = (r["Student 2:"] || "").trim();
     return `
     <div class="card" style="--i:${i}">
       <div class="card-top">
-        <div><p class="name">${esc(r.Attending)||"Unnamed"}</p><div class="role">${esc(r.Location)}</div></div>
+        <div><p class="name">${esc(r.Name)||"Unnamed"}</p></div>
         <div class="card-top-right">
-          <span class="status-chip ${statusIs(r.Status, "Open") ? 'on' : 'off'}"><span class="dot"></span>${statusIs(r.Status, "Open") ? 'Open' : 'Full'}</span>
+          <span class="status-chip ${open > 0 ? 'on' : 'off'}"><span class="dot"></span>${open > 0 ? `${open} of 2 spots open` : 'Full'}</span>
           <button class="save-btn ${saved?'saved':''}" data-id="${esc(id)}" data-section="shadowing" title="${saved?'Remove from saved':'Save for later'}" aria-label="${saved?'Remove from saved':'Save for later'}">${STAR_ICON(saved)}</button>
         </div>
       </div>
       <div class="tag-row">${r.Specialty ? `<span class="tag">${esc(r.Specialty)}</span>` : ""}</div>
-      <div>
-        <div class="proj-label">Availability</div>
-        <div class="proj-title">${esc(r.Availability)||"Not specified"}</div>
-        <div class="desc">${esc(r.Description)}</div>
+      ${r.Comments ? `<div class="desc">${esc(r.Comments)}</div>` : ""}
+      <div class="card-foot end" style="flex-direction:column; align-items:flex-start; gap:4px;">
+        <div class="commit"><small>Student 1: ${slot1 ? esc(slot1) : "open"}</small></div>
+        <div class="commit"><small>Student 2: ${slot2 ? esc(slot2) : "open"}</small></div>
       </div>
-      <div class="card-foot end">
-        ${r.Contact ? `<div class="email-row"><a class="contact-link" href="mailto:${esc(r.Contact)}">Reach out ${ARROW}</a>${copyBtn(r.Contact)}</div>` : ""}
-      </div>
-      ${r.Updated ? `<div class="updated">Updated ${esc(r.Updated)}</div>` : ""}
     </div>
   `;}).join("");
 }
@@ -1470,6 +1578,33 @@ document.getElementById("shadow-active-filters").addEventListener("click", (e) =
   if(key === "saved") document.getElementById("shadow-saved-only").checked = false;
   renderShadowing();
 });
+
+/* ---------------- ACC East (Thursday clinic slots) ----------------
+   Different shape from the per-attending list above: each row is one
+   pre-defined Date+Time slot, not an attending. Rows after the first for a
+   given Thursday leave Date blank on the real sheet (it's visually one date
+   with two time rows under it), so this forward-fills the last non-blank
+   Date while walking the rows in order. */
+function renderAccEast(){
+  const wrap = document.getElementById("acc-east-list");
+  if(!DATA.accEast || !DATA.accEast.length){ wrap.innerHTML = `<div class="empty">No ACC East slots posted yet.</div>`; return; }
+  let lastDate = "";
+  wrap.innerHTML = DATA.accEast.map(r => {
+    const date = (r.Date || "").trim() || lastDate;
+    lastDate = date;
+    const name = (r["Name (first last)"] || "").trim();
+    const taken = !!name;
+    const details = [r["Year in school"], r.Email, r["Cell number"]].filter(Boolean).join(" · ");
+    return `
+    <div class="event-card">
+      <div>
+        <div class="event-when">${esc(date)}${r.Time ? " · " + esc(r.Time) : ""}</div>
+        <div class="event-title">${taken ? esc(name) : "Open slot"}</div>
+        ${taken && details ? `<div class="event-desc">${esc(details)}</div>` : ""}
+      </div>
+    </div>
+  `;}).join("");
+}
 
 /* ---------------- OHANCAW ---------------- */
 function renderOhancaw(){
@@ -1535,7 +1670,7 @@ function updateHeroStats(){
   countUp(document.getElementById("stat-research"),
     DATA.research.filter(r => isRecruiting(r.Status)).length);
   countUp(document.getElementById("stat-shadow"),
-    DATA.shadowing.filter(r => statusIs(r.Status, "Open")).length);
+    DATA.shadowing.filter(r => openSlotCount(r) > 0).length);
   countUp(document.getElementById("stat-ann"),
     DATA.announcements.filter(r => isYes(r.Published)).length);
 }
@@ -1550,7 +1685,7 @@ function tunePoints(){
   const noisy = [], clean = [];
   // #5: amplitude reflects real open-opportunity count — more openings, more visible signal
   const openCount = (DATA.research ? DATA.research.filter(r => isRecruiting(r.Status)).length : 0) +
-                     (DATA.shadowing ? DATA.shadowing.filter(r => statusIs(r.Status, "Open")).length : 0);
+                     (DATA.shadowing ? DATA.shadowing.filter(r => openSlotCount(r) > 0).length : 0);
   const amplitude = Math.min(28, 14 + openCount * 1.6);
   for(let i=0;i<TUNE_POINTS;i++){
     const x = (i/(TUNE_POINTS-1)) * TUNE_W;
@@ -1653,7 +1788,7 @@ function buildSearchIndex(){
     SEARCH_INDEX.push({section:"Research", panel:"research", title:r["Principal Investigator"]||"Untitled project", sub:[r.Subspecialty, (r["Project Description"]||"").slice(0,60)].filter(Boolean).join(" · ")});
   });
   DATA.shadowing.forEach(r => {
-    SEARCH_INDEX.push({section:"Shadowing", panel:"shadowing", title:r.Attending||"Untitled", sub:[r.Specialty, r.Location].filter(Boolean).join(" · ")});
+    SEARCH_INDEX.push({section:"Shadowing", panel:"shadowing", title:r.Name||"Untitled", sub:[r.Specialty, (r.Comments||"").slice(0,60)].filter(Boolean).join(" · ")});
   });
   DATA.ohancaw.filter(r => isYes(r.Published)).forEach(r => {
     SEARCH_INDEX.push({section:"OHANCAW", panel:"ohancaw", title:r.Title||"Untitled", sub:truncate(r.Body,90)});
@@ -1931,13 +2066,13 @@ const PANEL_META = {
                    } },
   shadowing:     { num:"04", doc:"Shadowing", eyebrow:"Get Involved · Shadowing", titleA:"Shadow an", titleB:"attending.", showStats:false,
                    readout: () => {
-                     const n = DATA.shadowing.filter(r => statusIs(r.Status, "Open")).length;
+                     const n = DATA.shadowing.filter(r => openSlotCount(r) > 0).length;
                      return n ? `${n} attending${n===1?"":"s"} open to shadows now` : "Nothing open right now — check back soon.";
                    } },
   ohancaw:       { num:"05", doc:"OHANCAW", eyebrow:"Get Involved · OHANCAW", titleA:"Awareness,", titleB:"not silence.", sub:"Oral, Head & Neck Cancer Awareness Week — details post here as they're confirmed, closer to the event.", showStats:false },
   ideas:         { num:"06", doc:"Ideas & Q&A", eyebrow:"Ideas & Q&A", titleA:"Got an", titleB:"idea?", sub:"Research Coordinators review every submission before it appears publicly.", showStats:false },
   faq:           { num:"07", doc:"FAQ", eyebrow:"FAQ", titleA:"Your", titleB:"questions.", sub:"Click a question below to expand it.", showStats:false },
-  contact:       { num:"08", doc:"Contact", eyebrow:"Contact", titleA:"Reach the", titleB:"right team.", sub:"Every section on this site is owned by a specific team — reach out to whoever's responsible.", showStats:false },
+  contact:       { num:"08", doc:"Contact", eyebrow:"Contact", titleA:"Reach the", titleB:"right team.", sub:"", showStats:false },
 };
 
 function switchPanel(name){
@@ -1967,7 +2102,6 @@ function switchPanel(name){
   document.getElementById("mobile-nav-toggle").setAttribute("aria-expanded","false");
 
   // update hero content contextually
-  document.getElementById("hero-num").textContent = `n.${meta.num}`;
   document.getElementById("hero-eyebrow").textContent = meta.eyebrow;
   document.getElementById("hero-title-a").textContent = meta.titleA;
   document.getElementById("hero-title-b").textContent = meta.titleB;
@@ -1984,8 +2118,12 @@ function switchPanel(name){
     readoutEl.textContent = meta.readout();
   } else {
     readoutEl.style.display = "none";
-    subEl.style.display = "block";
-    subEl.textContent = meta.sub;
+    if(meta.sub){
+      subEl.style.display = "block";
+      subEl.textContent = meta.sub;
+    } else {
+      subEl.style.display = "none";
+    }
   }
   animateHeroTitle();
 
@@ -2073,15 +2211,16 @@ document.addEventListener("keydown", (e) => {
 
   const startPanel = (window.location.hash || "#announcements").replace("#","");
 
-  const [announcements, events, research, shadowing, ohancaw, ideas] = await Promise.all([
+  const [announcements, events, research, shadowing, accEast, ohancaw, ideas] = await Promise.all([
     loadCSV(ANNOUNCEMENTS_CSV_URL, SAMPLE.announcements),
     loadCSV(EVENTS_CSV_URL, SAMPLE.events),
     loadCSV(RESEARCH_CSV_URL, SAMPLE.research),
-    loadCSV(SHADOWING_CSV_URL, SAMPLE.shadowing),
+    loadCSV(SHADOWING_CSV_URL, SAMPLE.shadowing, "Name"),
+    loadCSV(ACC_EAST_CSV_URL, SAMPLE.accEast, "Date"),
     loadCSV(OHANCAW_CSV_URL, SAMPLE.ohancaw),
     loadCSV(IDEAS_CSV_URL, SAMPLE.ideas),
   ]);
-  DATA = { announcements, events, research, shadowing, ohancaw, ideas };
+  DATA = { announcements, events, research, shadowing, accEast, ohancaw, ideas };
 
   loadingBar.style.width = "100%";
   loadingBar.classList.add("done");
@@ -2099,7 +2238,7 @@ document.addEventListener("keydown", (e) => {
   renderAnnouncements();
   renderEvents();
   buildResearchPills(); renderResearch();
-  buildShadowPills(); renderShadowing();
+  buildShadowPills(); renderShadowing(); renderAccEast();
   renderOhancaw();
   renderIdeas();
   renderFAQ();
