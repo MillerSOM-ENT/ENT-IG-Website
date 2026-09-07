@@ -39,8 +39,6 @@ p{margin:0 0 1rem}
 #page-title:focus,#main-content:focus{outline:none}
 .skip-link{position:fixed;top:8px;left:8px;transform:translateY(-150%);padding:12px 20px;background:white;z-index:500}
 .skip-link:focus{transform:none}
-.draft-banner{background:#fff0e4;color:#713305;padding:6px 24px;text-align:center;font-size:.75rem;border-bottom:1px solid #f2d7c0}
-.draft-banner b{display:inline-block;text-transform:uppercase;letter-spacing:.08em;margin-right:8px}
 .topbar{background:white;border-bottom:1px solid var(--line);position:relative;z-index:20}
 .topbar-inner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:24px;padding-block:22px}
 .brand{display:flex;align-items:center;gap:18px;min-width:0;text-decoration:none}
@@ -51,6 +49,7 @@ p{margin:0 0 1rem}
 .question-form label{display:block;margin:18px 0 8px;font-weight:600}
 .question-form textarea,.question-form select{display:block;width:100%;padding:12px;border:1px solid var(--line);border-radius:7px;font:inherit;color:var(--ink);background:white}
 .question-form textarea{resize:vertical;min-height:120px}
+.question-form .question-recipients{margin:8px 0 0;font-size:.85rem;color:var(--orange-text);font-weight:600}
 .question-form .question-consent{display:flex;align-items:flex-start;gap:10px;font-weight:400}
 .question-consent input{margin-top:6px;flex-shrink:0}
 .question-form textarea:focus-visible,.question-form select:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
@@ -164,6 +163,11 @@ main{min-height:260px}
 .btn-outline:hover{background:var(--green-soft)}
 .icon-arrow{width:15px;height:15px;flex-shrink:0}
 .event-list{display:flex;flex-direction:column;gap:18px}
+.event-archive{margin-top:28px;border-top:1px solid var(--line);padding-top:20px}
+.event-archive summary{cursor:pointer;font-weight:600;color:var(--muted);padding:4px 0}
+.event-archive summary:focus-visible{outline:3px solid var(--orange);outline-offset:4px}
+.event-archive[open] summary{margin-bottom:18px}
+.event-archive .event-card{border-left-color:var(--line);opacity:.75}
 .event-card{background:white;border:1px solid var(--line);border-left:3px solid var(--orange);border-radius:var(--radius);padding:24px;display:flex;justify-content:space-between;gap:24px}
 .event-card>div{min-width:0}
 .event-when{font-size:.875rem;color:var(--orange-text);font-weight:600;margin-bottom:8px}
@@ -287,9 +291,6 @@ footer{border-top:1px solid var(--line);padding:26px 0 32px;font-size:.875rem;co
 <div id="loading-bar"></div>
 
 
-<div class="draft-banner">
-  <b>Preview</b> Some listings and links are still being finalized.</div>
-
 <div class="topbar">
   <div class="wrap topbar-inner">
     <a class="brand" href="#announcements" aria-label="ENT Interest Group home">
@@ -339,11 +340,11 @@ footer{border-top:1px solid var(--line);padding:26px 0 32px;font-size:.875rem;co
     <div class="hero-copy">
       <div class="eyebrow"><span id="hero-eyebrow">ENT Interest Group</span></div>
       <h1 class="title" id="page-title" tabindex="-1"><span id="hero-title-a">Your next step</span> <span id="hero-title-b">in ENT.</span></h1>
-      <p class="sub" id="hero-sub">Find your next research project, step into clinic, and stay connected with the ENT community at Miller.</p>
+      <p class="sub" id="hero-sub">The ENT Interest Group at the University of Miami Miller School of Medicine. Find your next research project, step into clinic, and stay connected with the ENT community here.</p>
       <p class="hero-readout" id="hero-readout" style="display:none;" aria-live="polite"></p>
     </div>
     <div class="stat-row" id="hero-stats" aria-label="Explore the interest group">
-      <a class="stat" href="#events"><b id="stat-events">—</b><span>Events posted</span><span class="stat-arrow" aria-hidden="true">↗</span></a>
+      <a class="stat" href="#events"><b id="stat-events">—</b><span>Upcoming events</span><span class="stat-arrow" aria-hidden="true">↗</span></a>
       <a class="stat" href="#research"><b id="stat-research">—</b><span>Research openings</span><span class="stat-arrow" aria-hidden="true">↗</span></a>
       <a class="stat" href="#shadowing"><b id="stat-shadow">—</b><span>Attendings with availability</span><span class="stat-arrow" aria-hidden="true">↗</span></a>
       <a class="stat" href="#announcements"><b id="stat-ann">—</b><span>Announcements</span><span class="stat-arrow" aria-hidden="true">↗</span></a>
@@ -373,6 +374,10 @@ footer{border-top:1px solid var(--line);padding:26px 0 32px;font-size:.875rem;co
         <span class="maintainer">Events Coordinators</span>
       </div>
       <div id="event-list" class="event-list"></div>
+      <details id="event-archive" class="event-archive" hidden>
+        <summary>Past events</summary>
+        <div id="event-archive-list" class="event-list"></div>
+      </details>
     </div>
   </section>
 
@@ -527,7 +532,8 @@ footer{border-top:1px solid var(--line);padding:26px 0 32px;font-size:.875rem;co
         <h3>Ask the ENT interest group</h3>
         <p id="question-help">This form prepares an email, not an online submission. Review and send it in your email app. Do not include patient information or confidential research details.</p>
         <label for="question-topic">Topic</label>
-        <select id="question-topic"><option>General question</option><option>Research idea</option><option>Shadowing</option><option>Events</option><option>Website feedback</option></select>
+        <select id="question-topic" aria-describedby="question-recipients"><option>General question</option><option>Research idea</option><option>Shadowing</option><option>Events</option><option>OHANCAW</option><option>Website feedback</option></select>
+        <p id="question-recipients" class="question-recipients" role="status"></p>
         <label for="question-body">Your question or idea <span>(required)</span></label>
         <textarea id="question-body" required maxlength="1200" rows="5" aria-describedby="question-help" placeholder="What would you like to know or explore?"></textarea>
         <label class="question-consent"><input id="question-permission" type="checkbox"> Coordinators may publish an anonymized version of my question and their answer.</label>
@@ -636,13 +642,43 @@ const OHANCAW_CSV_URL = "";
 const IDEAS_CSV_URL = "";
 
 const IDEAS_FORM_URL = ""; // Add the final public form URL when ready.
-const QUESTIONS_EMAIL = "tek37@miami.edu,ixa588@miami.edu"; // Research coordinators; review at annual handoff.
+
+// Each topic in the "Topic" dropdown routes the prepared email to the people
+// who actually own that area, instead of sending everything to one inbox.
+// Keep these in sync with the Contact tab at the annual e-board handoff —
+// these are the only place recipient addresses are defined for this form.
+const QUESTION_ROUTING = {
+  "General question": { label:"Co-Presidents", names:"Niko DiStefano, Laura Wild", to:"nvd10@miami.edu,lew126@miami.edu" },
+  "Research idea":    { label:"Research Coordinators", names:"Taylor Kring, Ibraheem Ahmed", to:"tek37@miami.edu,ixa588@miami.edu" },
+  "Shadowing":        { label:"Shadowing Coordinator", names:"Carlos Lange Nava", to:"cxl1033@miami.edu" },
+  "Events":           { label:"Events Coordinators", names:"Isabella Guanche, Matthew Colbert", to:"idg18@miami.edu,mhc129@miami.edu" },
+  "OHANCAW":          { label:"OHANCAW Directors", names:"Madison Hawthrone, Eric Sokhn, Nadine Javier", to:"mah399@miami.edu,ess139@miami.edu,njavier@miami.edu" },
+  "Website feedback": { label:"Site maintainer", names:"Ibraheem Ahmed", to:"ixa588@miami.edu" }
+};
+// Anything not in the map above falls back to the Co-Presidents rather than
+// silently producing an email with no recipient.
+const QUESTION_ROUTING_FALLBACK = QUESTION_ROUTING["General question"];
+
+function routeForTopic(topic){
+  return QUESTION_ROUTING[topic] || QUESTION_ROUTING_FALLBACK;
+}
 
 function questionDraft(topic, question, permission){
+  const route = routeForTopic(topic);
   const subject = `ENT IG: ${topic}`;
   const body = `${question.trim()}\n\nPermission to publish an anonymized question and answer: ${permission ? "Yes" : "No — private reply only"}.\nPlease remove identifying details before any approved publication.`;
-  return {href:`mailto:${QUESTIONS_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, text:`To: ${QUESTIONS_EMAIL}\nSubject: ${subject}\n\n${body}`};
+  return {href:`mailto:${route.to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, text:`To: ${route.to}\nSubject: ${subject}\n\n${body}`};
 }
+
+// Show who the current topic will reach, so it's obvious before sending.
+const questionTopic = document.getElementById("question-topic");
+const questionRecipients = document.getElementById("question-recipients");
+function updateQuestionRecipients(){
+  const route = routeForTopic(questionTopic.value);
+  questionRecipients.textContent = `Goes to the ${route.label} — ${route.names}.`;
+}
+questionTopic.addEventListener("change", updateQuestionRecipients);
+updateQuestionRecipients();
 const questionForm = document.getElementById("question-form");
 questionForm.addEventListener("submit", e => {
   e.preventDefault();
@@ -665,9 +701,6 @@ questionForm.addEventListener("input", () => {
 const FAQ_ITEMS = [
   {q:"How do I actually get involved in a research project?", a:"Email the contact listed on that project's card directly. Mention you saw it on the ENT IG site, briefly describe your background, and ask for 15–20 minutes to talk."},
   {q:"How do shadowing sign-ups work?", a:"Arrange clinic or OR shadowing with the attending, then claim an available slot on the shared sign-up sheet. For ACC Clinic East, complete the pre-shadowing form at least three days before your date."},
-  {q:"Where do event RSVPs actually happen?", a:"Check the Events tab for each event's details — for now, reach out to the Events Coordinators listed on the Contact page with questions."},
-  {q:"How often is any of this actually updated?", a:"Each section pulls live from that department's spreadsheet. Refresh the website to load the latest published updates; spreadsheet publishing may take a few minutes."},
-  {q:"I don't have research or clinical experience yet. Can I still reach out?", a:"Yes. Listings marked \u201cLow\u201d commitment or general shadowing availability are usually built for first-timers."},
   {q:"Can I suggest an idea that doesn't have a mentor yet?", a:"Yes — use the Ideas & Q&A tab. Coordinators review submissions and may help match it with faculty interest."}
 ];
 
@@ -862,10 +895,39 @@ document.addEventListener("click", (e) => {
   const btn = e.target.closest(".save-btn");
   if(!btn) return;
   const id = btn.dataset.id;
-  if(SAVED.has(id)) SAVED.delete(id); else SAVED.add(id);
+  const section = btn.dataset.section;
+  const nowSaved = !SAVED.has(id);
+  if(nowSaved) SAVED.add(id); else SAVED.delete(id);
   persistSaved();
-  if(btn.dataset.section === "research") renderResearch();
-  if(btn.dataset.section === "shadowing") renderShadowing();
+
+  // Re-rendering the whole grid throws away the button the user is standing on,
+  // which strands keyboard and screen-reader users. Only rebuild when a card
+  // actually has to leave the list (the "Saved only" filter is on) — otherwise
+  // update this one control in place and leave focus exactly where it was.
+  const savedOnlyBox = document.getElementById(
+    section === "research" ? "research-saved-only" : "shadow-saved-only"
+  );
+  const mustRebuild = savedOnlyBox && savedOnlyBox.checked;
+
+  if(!mustRebuild){
+    btn.classList.toggle("saved", nowSaved);
+    btn.setAttribute("aria-pressed", String(nowSaved));
+    const label = nowSaved ? "Remove from saved" : "Save for later";
+    btn.title = label;
+    btn.setAttribute("aria-label", label);
+    btn.innerHTML = STAR_ICON(nowSaved);
+    return;
+  }
+
+  // A card is about to disappear: remember where we were, rebuild, then put
+  // focus on the nearest sensible control instead of dropping it to <body>.
+  const cards = [...document.querySelectorAll(`.save-btn[data-section="${section}"]`)];
+  const position = cards.indexOf(btn);
+  if(section === "research") renderResearch(); else renderShadowing();
+  const after = [...document.querySelectorAll(`.save-btn[data-section="${section}"]`)];
+  const next = after[Math.min(position, after.length - 1)];
+  if(next) next.focus();
+  else if(savedOnlyBox) savedOnlyBox.focus();
 });
 
 /* ---------------- "New" badge helper ---------------- */
@@ -909,13 +971,49 @@ function driveImageUrl(link){
   if(m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1000`;
   return trimmed;
 }
-function renderEvents(){
-  const rows = DATA.events.filter(r => isYes(r.Published));
-  const wrap = document.getElementById("event-list");
-  if(!rows.length){ wrap.innerHTML = `<div class="empty">${emptyMessage("events", "No events posted yet. Check back soon.")}</div>`; return; }
-  wrap.innerHTML = rows.map(r => {
-    const flyerSrc = sanitizeUrl(driveImageUrl(r.Flyer));
-    return `
+// ---- Event dates ----------------------------------------------------------
+// Coordinators type dates by hand ("Jul 14, 2026", "7/14/2026", "2026-07-14"),
+// so parse defensively and treat a date as valid through the END of that day —
+// an event happening today is still upcoming, not past.
+function eventDateValue(dateStr){
+  const raw = (dateStr || "").trim();
+  if(!raw) return null;
+  // yyyy-mm-dd is parsed as UTC by the Date constructor, which can shift the
+  // day backwards in western timezones — build it in local time instead.
+  const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const d = iso
+    ? new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]))
+    : new Date(raw);
+  if(isNaN(d.getTime())) return null;
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
+// Rows whose Date can't be parsed (e.g. "TBD", "Spring 2027") are kept in the
+// upcoming list rather than dropped — better a coordinator sees it than has it
+// vanish silently — but they sort after everything with a real date.
+function splitEvents(rows){
+  const upcoming = [], past = [];
+  const now = Date.now();
+  rows.forEach(r => {
+    const d = eventDateValue(r.Date);
+    const entry = {row:r, when:d};
+    if(d && d.getTime() < now) past.push(entry); else upcoming.push(entry);
+  });
+  upcoming.sort((a, b) => {
+    if(a.when && b.when) return a.when - b.when;
+    if(a.when) return -1;
+    if(b.when) return 1;
+    return 0;
+  });
+  past.sort((a, b) => b.when - a.when); // most recent first
+  return {upcoming, past};
+}
+function publishedEvents(){ return DATA.events.filter(r => isYes(r.Published)); }
+function upcomingEvents(){ return splitEvents(publishedEvents()).upcoming.map(e => e.row); }
+
+function eventCard(r){
+  const flyerSrc = sanitizeUrl(driveImageUrl(r.Flyer));
+  return `
     <div class="event-card">
       <div>
         <div class="event-when">${esc(r.Date)}${r.Time ? " · " + esc(r.Time) : ""}</div>
@@ -925,7 +1023,26 @@ function renderEvents(){
       </div>
       ${flyerSrc ? `<a class="event-flyer" href="${esc(sanitizeUrl(r.Flyer) || flyerSrc)}" target="_blank" rel="noopener" title="View full flyer"><img src="${esc(flyerSrc)}" alt="${esc(r.Title)} flyer" loading="lazy" onerror="this.closest('.event-flyer').style.display='none'"></a>` : ""}
     </div>
-  `;}).join("");
+  `;
+}
+function renderEvents(){
+  const {upcoming, past} = splitEvents(publishedEvents());
+  const wrap = document.getElementById("event-list");
+  const archive = document.getElementById("event-archive");
+  const archiveList = document.getElementById("event-archive-list");
+
+  wrap.innerHTML = upcoming.length
+    ? upcoming.map(e => eventCard(e.row)).join("")
+    : `<div class="empty">${emptyMessage("events", "No upcoming events posted yet. Check back soon.")}</div>`;
+
+  if(past.length){
+    archive.hidden = false;
+    archive.querySelector("summary").textContent = `Past events (${past.length})`;
+    archiveList.innerHTML = past.map(e => eventCard(e.row)).join("");
+  } else {
+    archive.hidden = true;
+    archiveList.innerHTML = "";
+  }
 }
 
 /* ---------------- Research directory ---------------- */
@@ -1140,7 +1257,7 @@ function renderIdeas(){
   const wrap = document.getElementById("qa-list");
   const status = document.getElementById("qa-status");
   status.textContent = rows.length ? `${rows.length} published question${rows.length===1?'':'s'}` : "";
-  if(!rows.length){ wrap.innerHTML = `<div class="empty">${emptyMessage("ideas", "No questions published yet. Contact the research coordinators with your ideas.")}</div>`; return; }
+  if(!rows.length){ wrap.innerHTML = `<div class="empty">${emptyMessage("ideas", "No questions published yet. Use the form above and it will reach the right coordinators for your topic.")}</div>`; return; }
   wrap.innerHTML = rows.map(r => `
     <div class="qa-item">
       ${r.Category ? `<span class="qa-cat">${esc(r.Category)}</span>` : ""}
@@ -1184,7 +1301,7 @@ function countUp(el, target, duration=350){
 }
 function updateHeroStats(){
   const stats = [
-    ["stat-events", "events", DATA.events.filter(r => isYes(r.Published)).length],
+    ["stat-events", "events", upcomingEvents().length],
     ["stat-research", "research", DATA.research.filter(r => isRecruiting(r.Status)).length],
     ["stat-shadow", "shadowing", DATA.shadowing.filter(r => openSlotCount(r) > 0).length],
     ["stat-ann", "announcements", DATA.announcements.filter(r => isYes(r.Published)).length]
@@ -1209,7 +1326,7 @@ function buildSearchIndex(){
   DATA.announcements.filter(r => isYes(r.Published)).forEach(r => {
     SEARCH_INDEX.push({section:"Announcements", panel:"announcements", title:r.Title||"Untitled", sub:truncate(r.Body,90)});
   });
-  DATA.events.filter(r => isYes(r.Published)).forEach(r => {
+  upcomingEvents().forEach(r => {
     SEARCH_INDEX.push({section:"Events", panel:"events", title:r.Title||"Untitled", sub:[r.Date, r.Location].filter(Boolean).join(" · ")});
   });
   DATA.research.forEach(r => {
@@ -1226,6 +1343,24 @@ function buildSearchIndex(){
   });
   FAQ_ITEMS.forEach(f => {
     SEARCH_INDEX.push({section:"FAQ", panel:"faq", title:f.q, sub:truncate(f.a,90)});
+  });
+  // Contact cards are static markup, so read them straight from the DOM —
+  // that keeps this index correct automatically when the roster is edited.
+  document.querySelectorAll(".contact-grid .contact-card").forEach(card => {
+    const role = (card.querySelector(".role-tag")?.textContent || "").trim();
+    card.querySelectorAll(".email-row").forEach(row => {
+      const name = (row.querySelector("strong")?.textContent || "").trim();
+      const email = (row.querySelector("a")?.textContent || "").trim();
+      if(!name) return;
+      SEARCH_INDEX.push({section:"Contacts", panel:"contact", title:name, sub:[role, email].filter(Boolean).join(" · ")});
+    });
+  });
+  // Page names, so "shadowing" or "contact" jumps straight to the section
+  // even before any sheet data has loaded.
+  PANELS.forEach(name => {
+    const meta = PANEL_META[name];
+    if(!meta) return;
+    SEARCH_INDEX.push({section:"Pages", panel:name, title:meta.doc, sub:"Go to the " + meta.doc + " page"});
   });
 }
 
@@ -1325,10 +1460,10 @@ const PANELS = ["announcements","events","research","shadowing","ohancaw","ideas
 const GET_INVOLVED_PANELS = ["research","shadowing","ohancaw"];
 
 const PANEL_META = {
-  announcements: { num:"01", doc:"Announcements", eyebrow:"ENT Interest Group", titleA:"Your next step", titleB:"in ENT.", split:true, sub:"Find your next research project, step into clinic, and stay connected with the ENT community at Miller.", showStats:true },
+  announcements: { num:"01", doc:"Announcements", eyebrow:"ENT Interest Group", titleA:"Your next step", titleB:"in ENT.", split:true, sub:"The ENT Interest Group at the University of Miami Miller School of Medicine. Find your next research project, step into clinic, and stay connected with the ENT community here.", showStats:true },
   events:        { num:"02", doc:"Events", eyebrow:"Events", titleA:"What's", titleB:"coming up.", showStats:false,
                    readout: () => {
-                     const upcoming = DATA.events.filter(r => isYes(r.Published));
+                     const upcoming = upcomingEvents();
                      if(!upcoming.length) return "Nothing on the calendar yet — check back soon.";
                      const next = upcoming[0];
                      return `Next up — ${next.Date}${next.Time ? " · " + next.Time : ""} · ${next.Title}`;
