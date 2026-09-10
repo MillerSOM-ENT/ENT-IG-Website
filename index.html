@@ -650,7 +650,7 @@ footer{border-top:1px solid var(--line);padding:26px 0 32px;font-size:.875rem;co
 // ============================================================
 const ANNOUNCEMENTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSZ0K34jl-0Y394yD6tEXhVYJdsGUMu7IkbE51taOLs9b1Eqq0dlLTOGScLk2-XnbPzRyOOKGtHGmUB/pub?output=csv";
 const EVENTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRmNJaJSDf_e6lqnghCTPMPZxt2e7ZeF5j21TMaAnTRcuybUeY-sRGn6mSSZAMr35OYQkyFlaEsDxFn/pub?output=csv";
-const RESEARCH_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCKWhAa1AYzttqkpb1IG_z3GQ6y0sdV446CKXfSMZvej0K0SgBbDbBeRGfgdeIsJbul-NFOJiIYMQe/pub?output=csv";
+const RESEARCH_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRtBZQpYSvWVjX4Boz_whtZm-34Fcc7jal2aNBPGnhgdmGrBhz6Bm7K1fw09AP-eCdKEIyLfIETI2nX/pub?gid=4138343&single=true&output=csv";  // form responses sheet — see "Published" gate
 const SHADOWING_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQaV6v5yUxnfU1puFtBzlkBJhk6cqS9F9tdIS0U0WptiHtvGUhAV7k6QP9Gi4s6VaEC63ZNJpXzyLlq/pub?output=csv";
 const ACC_EAST_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vToNTUSEiFbZmzb1Iit6cRx47fDPPQ2BtCIiu3G1jKiXMg7yBE0RfyRO5kovZT-k96qeH8ZJKmVVz91/pub?output=csv";
 const OHANCAW_CSV_URL = "";
@@ -1109,6 +1109,21 @@ function normalizeAllFeeds(){
 // "Filled", "on hold" and "not recruiting until spring" all register.
 // A value we can't interpret at all still shows as recruiting (better to
 // surface an opportunity than hide it) and is listed in the ?check=1 report.
+// Approval gate for the Research Directory.
+//
+// When submissions arrive through the intake form, the response sheet carries
+// a "Published" column that a coordinator ticks before a project is public.
+// The original master sheet has no such column, so the gate only applies when
+// the column actually exists — otherwise adding it would blank the directory.
+// Blank in a sheet that HAS the column means "not approved yet", which is the
+// whole point of the gate.
+function publishedOk(r){
+  return ("Published" in r) ? isYes(r.Published) : true;
+}
+// Every consumer of research data goes through this, so an unapproved row
+// can't leak into a pill, a count, or the search index.
+function publishedResearch(){ return (DATA.research || []).filter(publishedOk); }
+
 function isRecruiting(v){
   const resolved = VOCAB.Status.resolve(normalizeKey(v));
   return resolved === null ? true : resolved === "Recruiting";
@@ -1358,13 +1373,13 @@ function renderResearch(){
   const savedOnly = document.getElementById("research-saved-only").checked;
 
   const chips = [];
-  if(researchType) chips.push({key:"type", label:vocabLabel(DATA.research, "Research Type", researchType)});
-  if(researchSub) chips.push({key:"sub", label:vocabLabel(DATA.research, "Subspecialty", researchSub)});
+  if(researchType) chips.push({key:"type", label:vocabLabel(publishedResearch(), "Research Type", researchType)});
+  if(researchSub) chips.push({key:"sub", label:vocabLabel(publishedResearch(), "Subspecialty", researchSub)});
   if(recruitingOnly) chips.push({key:"recruiting", label:"Recruiting"});
   if(savedOnly) chips.push({key:"saved", label:"Saved"});
   renderActiveFilters("research-active-filters", chips);
 
-  let rows = DATA.research.filter(r => {
+  let rows = publishedResearch().filter(r => {
     if(researchType && !vocabMatches(r, "Research Type", researchType)) return false;
     if(researchSub && !vocabMatches(r, "Subspecialty", researchSub)) return false;
     if(recruitingOnly && !isRecruiting(r.Status)) return false;
@@ -1377,8 +1392,8 @@ function renderResearch(){
   });
   const grid = document.getElementById("research-grid");
   const statusLine = document.getElementById("research-status-line");
-  if(!rows.length){ statusLine.textContent = ""; grid.innerHTML = `<div class="empty">${emptyMessage("research", DATA.research.length ? "No matches. Try another search or clear a filter." : "No research projects posted yet.")}</div>`; return; }
-  statusLine.textContent = `Showing ${rows.length} of ${DATA.research.length} listings`;
+  if(!rows.length){ statusLine.textContent = ""; grid.innerHTML = `<div class="empty">${emptyMessage("research", publishedResearch().length ? "No matches. Try another search or clear a filter." : "No research projects posted yet.")}</div>`; return; }
+  statusLine.textContent = `Showing ${rows.length} of ${publishedResearch().length} listings`;
   grid.innerHTML = rows.map((r, i) => {
     const id = listingId("research", r, "Principal Investigator", "Project Description");
     const saved = SAVED.has(id);
@@ -1410,8 +1425,8 @@ function renderResearch(){
   `;}).join("");
 }
 function buildResearchPills(){
-  const types = vocabPills(DATA.research, "Research Type");
-  const subs = vocabPills(DATA.research, "Subspecialty");
+  const types = vocabPills(publishedResearch(), "Research Type");
+  const subs = vocabPills(publishedResearch(), "Subspecialty");
   document.getElementById("research-pills-role").innerHTML = types.map(t => `<button class="pill" data-type="type" data-val="${esc(t.group)}" aria-pressed="false">${esc(t.label)}</button>`).join("");
   document.getElementById("research-pills-sub").innerHTML = subs.map(s => `<button class="pill" data-type="sub" data-val="${esc(s.group)}" aria-pressed="false">${esc(s.label)}</button>`).join("");
   document.querySelectorAll('#panel-research .pill').forEach(btn => {
@@ -1603,7 +1618,7 @@ function countUp(el, target, duration=350){
 function updateHeroStats(){
   const stats = [
     ["stat-events", "events", upcomingEvents().length],
-    ["stat-research", "research", DATA.research.filter(r => isRecruiting(r.Status)).length],
+    ["stat-research", "research", publishedResearch().filter(r => isRecruiting(r.Status)).length],
     ["stat-shadow", "shadowing", DATA.shadowing.filter(r => openSlotCount(r) > 0).length],
     ["stat-ann", "announcements", DATA.announcements.filter(r => isYes(r.Published)).length]
   ];
@@ -1636,7 +1651,7 @@ function buildSearchIndex(){
   upcomingEvents().forEach(r => {
     SEARCH_INDEX.push({section:"Events", panel:"events", title:r.Title||"Untitled", sub:[r.Date, r.Location].filter(Boolean).join(" · ")});
   });
-  DATA.research.forEach(r => {
+  publishedResearch().forEach(r => {
     SEARCH_INDEX.push({section:"Research", panel:"research", title:r["Principal Investigator"]||"Untitled project", sub:[r.Subspecialty, (r["Project Description"]||"").slice(0,60)].filter(Boolean).join(" · ")});
   });
   DATA.shadowing.forEach(r => {
@@ -1777,7 +1792,7 @@ const PANEL_META = {
                    } },
   research:      { num:"03", doc:"Research Directory", eyebrow:"Get Involved · Research", titleA:"Explore", titleB:"ENT research.", showStats:false,
                    readout: () => {
-                     const n = DATA.research.filter(r => isRecruiting(r.Status)).length;
+                     const n = publishedResearch().filter(r => isRecruiting(r.Status)).length;
                      return n ? `${n} project${n===1?"":"s"} recruiting right now` : "Nothing recruiting right now — check back soon.";
                    } },
   shadowing:     { num:"04", doc:"Shadowing", eyebrow:"Get Involved · Shadowing", titleA:"Shadow an", titleB:"attending.", showStats:false,
