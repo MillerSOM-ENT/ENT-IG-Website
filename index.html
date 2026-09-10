@@ -163,6 +163,20 @@ main{min-height:260px}
 .btn-primary:hover{background:var(--green-deep)}
 .btn-outline:hover{background:var(--green-soft)}
 .icon-arrow{width:15px;height:15px;flex-shrink:0}
+.qa-panel{position:fixed;inset:0;z-index:600;background:#0b1f17e6;overflow:auto;padding:32px 16px;display:flex;justify-content:center;align-items:flex-start}
+.qa-inner{background:white;border-radius:var(--radius);max-width:720px;width:100%;padding:28px}
+.qa-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:8px}
+.qa-head h2{font-size:1.3rem}
+.qa-close{border:1px solid var(--line);background:white;border-radius:7px;padding:10px 16px;min-height:44px;font-weight:600}
+.qa-close:hover{background:var(--green-soft)}
+.qa-panel h3{font-size:.95rem;margin:22px 0 8px;color:var(--green-deep)}
+.qa-panel ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:12px}
+.qa-panel li{font-size:.9rem;line-height:1.5}
+.qa-where{color:var(--muted);font-size:.8rem}
+.qa-fix{color:var(--orange-text);font-size:.82rem;font-weight:600}
+.qa-clean{background:var(--green-soft);border-radius:8px;padding:14px 16px;margin:12px 0 0;font-weight:600;color:var(--green-deep)}
+.qa-foot{margin:22px 0 0;font-size:.8rem;color:var(--muted)}
+.qa-foot code{background:var(--paper);padding:2px 6px;border-radius:4px}
 .event-list{display:flex;flex-direction:column;gap:18px}
 .event-archive{margin-top:28px;border-top:1px solid var(--line);padding-top:20px}
 .event-archive summary{cursor:pointer;font-weight:600;color:var(--muted);padding:4px 0}
@@ -809,10 +823,296 @@ function esc(s){
 // status comparison goes through these instead of a bare === match.
 function isYes(v){ return (v || "").toString().trim().toLowerCase() === "yes"; }
 function statusIs(v, target){ return (v || "").toString().trim().toLowerCase() === target.toLowerCase(); }
+/* ---------------- Controlled vocabulary ----------------------------------
+   Subspecialty, Research Type, Status and Specialty are meant to be
+   dropdowns, but a spreadsheet cell is just a text box: people type
+   "otology", "Oto/Neuro", "Closed", or paste a value with a trailing space.
+   Every one of those used to create its own filter pill, and anything in
+   Status other than the exact words "Not Recruiting" silently showed the
+   project as recruiting.
+
+   So the site stops trusting the sheet. Every controlled value is resolved
+   here on load:
+     1. normalizeKey() flattens case, accents, punctuation and filler words
+     2. a canonical/alias table maps known synonyms to one spelling
+     3. anything still unrecognized is DISPLAYED AS TYPED (never hide a
+        coordinator's data) but deduplicated by its normalized key, so at
+        minimum "otolgy" and "Otolgy" collapse into one pill
+     4. every unrecognized value is collected for the report at ?check=1
+
+   CANONICAL is also the single source of truth for the sheet's dropdowns —
+   the Apps Script in the launch checklist is generated from these same
+   lists, so the sheet and the site can't drift apart.
+--------------------------------------------------------------------------*/
+function normalizeKey(s){
+  return (s || "")
+    .toString()
+    .toLowerCase()
+    .normalize("NFKD").replace(/[̀-ͯ]/g, "")   // strip accents
+    .replace(/&/g, " and ")
+    .replace(/[\/\\\-_,.;:()\[\]]+/g, " ")               // separators become spaces
+    .replace(/\b(and|the|of|for|surgery|research|department|division|medicine)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Negative tokens are checked FIRST and by substring, so "not recruiting
+// until spring", "Filled for now" and "closed" all resolve correctly —
+// exact-match was the old bug.
+const STATUS_NEGATIVE = ["not recruiting","not currently","not accepting","not open","no longer","no openings","closed","full","filled","complete","finished","inactive","paused","on hold","unavailable","wait list","waitlist"];
+const STATUS_POSITIVE = ["recruiting","open","accepting","active","available","yes"];
+
+const VOCAB = {
+  "Subspecialty": {
+    canonical: ["Otology/Neurotology","Rhinology","Laryngology","Head & Neck","Pediatric Otolaryngology","Facial Plastic Surgery","Sleep Surgery","Allergy","General ENT"],
+    aliases: {
+      "otology":"Otology/Neurotology", "neurotology":"Otology/Neurotology", "otology neurotology":"Otology/Neurotology",
+      "oto neuro":"Otology/Neurotology", "ear":"Otology/Neurotology", "hearing":"Otology/Neurotology", "cochlear implant":"Otology/Neurotology",
+      "skull base":"Rhinology", "rhinology skull base":"Rhinology", "sinus":"Rhinology", "nose":"Rhinology", "sinonasal":"Rhinology",
+      "voice":"Laryngology", "laryngology voice":"Laryngology", "larynx":"Laryngology", "swallowing":"Laryngology",
+      "head neck oncology":"Head & Neck", "head neck oncologic":"Head & Neck", "head neck cancer":"Head & Neck", "hn":"Head & Neck", "oncology":"Head & Neck",
+      "peds":"Pediatric Otolaryngology", "pediatrics":"Pediatric Otolaryngology", "pediatric ent":"Pediatric Otolaryngology", "pediatric":"Pediatric Otolaryngology",
+      "facial plastics":"Facial Plastic Surgery", "facial plastic reconstructive":"Facial Plastic Surgery", "plastics":"Facial Plastic Surgery", "facial plastic":"Facial Plastic Surgery",
+      "sleep":"Sleep Surgery", "sleep apnea":"Sleep Surgery",
+      "allergy immunology":"Allergy",
+      "general":"General ENT", "general otolaryngology":"General ENT", "comprehensive":"General ENT", "general ent":"General ENT"
+    }
+  },
+  "Research Type": {
+    canonical: ["Clinical","Basic Science","Translational","Clinical and Basic Science","Education/Quality Improvement"],
+    aliases: {
+      "clinical":"Clinical", "chart review":"Clinical", "retrospective":"Clinical", "outcomes":"Clinical",
+      "basic":"Basic Science", "basic science":"Basic Science", "bench":"Basic Science", "wet lab":"Basic Science", "laboratory":"Basic Science",
+      "translational":"Translational", "clinical translational":"Translational",
+      "clinical basic science":"Clinical and Basic Science", "basic science clinical":"Clinical and Basic Science", "both":"Clinical and Basic Science",
+      "qi":"Education/Quality Improvement", "quality improvement":"Education/Quality Improvement", "education":"Education/Quality Improvement", "med ed":"Education/Quality Improvement", "medical education":"Education/Quality Improvement"
+    }
+  },
+  "Status": {
+    canonical: ["Recruiting","Not Recruiting"],
+    // Status resolves by substring rather than lookup, so free text works.
+    resolve(key){
+      if(!key) return "Recruiting";                                   // blank = recruiting, by convention
+      if(STATUS_NEGATIVE.some(t => key.includes(t))) return "Not Recruiting";
+      if(STATUS_POSITIVE.some(t => key.includes(t))) return "Recruiting";
+      return null;                                                    // unrecognized
+    }
+  }
+};
+// The Shadowing sheet's "Specialty" column describes the same subspecialties,
+// so it shares one vocabulary — that also keeps pill names consistent between
+// the Research and Shadowing tabs.
+VOCAB["Specialty"] = VOCAB["Subspecialty"];
+
+// Build normalized lookup tables once, and check the vocabulary against
+// itself: if two canonical entries flatten to the same key, or an alias
+// contradicts a canonical, that's a config bug and it shows up in ?check=1.
+const VOCAB_CONFIG_ISSUES = [];
+Object.entries(VOCAB).forEach(([field, spec]) => {
+  if(spec.lookup) return;                       // Specialty shares Subspecialty's object
+  const lookup = {};
+  spec.canonical.forEach(c => {
+    const k = normalizeKey(c);
+    if(lookup[k] && lookup[k] !== c) VOCAB_CONFIG_ISSUES.push(`${field}: "${c}" and "${lookup[k]}" both reduce to "${k}"`);
+    lookup[k] = c;
+  });
+  Object.entries(spec.aliases || {}).forEach(([alias, target]) => {
+    const k = normalizeKey(alias);
+    if(!spec.canonical.includes(target)) VOCAB_CONFIG_ISSUES.push(`${field}: alias "${alias}" points at "${target}", which is not in the canonical list`);
+    if(lookup[k] && lookup[k] !== target) VOCAB_CONFIG_ISSUES.push(`${field}: alias "${alias}" conflicts with "${lookup[k]}"`);
+    lookup[k] = target;
+  });
+  spec.lookup = lookup;
+});
+
+// Small edit-distance check, only used to suggest a fix in the QA report.
+function editDistance(a, b){
+  const m = a.length, n = b.length;
+  if(!m || !n) return Math.max(m, n);
+  let prev = Array.from({length:n+1}, (_, j) => j);
+  for(let i=1;i<=m;i++){
+    const cur = [i];
+    for(let j=1;j<=n;j++){
+      cur[j] = Math.min(prev[j] + 1, cur[j-1] + 1, prev[j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+function closestCanonical(spec, key){
+  // Compare against alias keys as well as canonical names: a typo like
+  // "Otolgy" is one character off the alias "otology", but nowhere near the
+  // canonical "Otology/Neurotology", so canonical-only matching missed it.
+  let best = null, bestD = Infinity;
+  const consider = (candidateKey, target) => {
+    const d = editDistance(key, candidateKey);
+    if(d < bestD){ bestD = d; best = target; }
+  };
+  spec.canonical.forEach(c => consider(normalizeKey(c), c));
+  Object.entries(spec.lookup || {}).forEach(([k, target]) => consider(k, target));
+  return bestD <= Math.max(2, Math.ceil(key.length * 0.4)) ? best : null;
+}
+
+const VOCAB_ISSUES = [];     // unrecognized values, for ?check=1
+const VOCAB_FIXES = [];      // values we silently corrected, also reported
+
+// Resolves one cell. Unrecognized values are returned unchanged so nothing
+// disappears from the site; they're deduplicated by normalized key via
+// `seen` so at least casing/spacing variants collapse into one pill.
+// Returns the GROUPING KEY for a value — never a replacement for it.
+// The sheet's exact wording is always what gets displayed; this only decides
+// which values belong in the same bucket for pills and filters.
+function vocabGroup(field, raw){
+  const original = (raw || "").toString().trim();
+  if(!original) return "";
+  const spec = VOCAB[field];
+  const key = normalizeKey(original);
+  if(!spec || !key) return key || original.toLowerCase();
+  if(spec.resolve){
+    const resolved = spec.resolve(key);
+    if(resolved) return resolved;          // canonical bucket
+  } else if(spec.lookup[key]){
+    return spec.lookup[key];               // canonical bucket
+  }
+  // Unrecognized: bucket by its flattened form, so "Otolgy" and "otolgy"
+  // still collapse together even though neither is on the approved list.
+  return key;
+}
+
+// Field name used to stash the grouping key alongside the original value.
+function groupField(field){ return "__group_" + field; }
+
+// Annotates a feed with grouping keys. It does NOT modify any value the
+// coordinators typed — cards render the sheet's exact wording.
+function applyVocabulary(rows, fields, sectionLabel, idField){
+  (rows || []).forEach(r => {
+    fields.forEach(field => {
+      if(!(field in r)) return;
+      const original = (r[field] || "").toString().trim();
+      if(!original) return;
+      const spec = VOCAB[field];
+      const key = normalizeKey(original);
+      const group = vocabGroup(field, original);
+      r[groupField(field)] = group;
+
+      const recognized = spec.resolve ? spec.resolve(key) !== null : !!spec.lookup[key];
+      const where = (r[idField] || "").toString().trim() || "(row with no " + idField + ")";
+      if(!recognized){
+        VOCAB_ISSUES.push({
+          section: sectionLabel, field, value: original, row: where,
+          suggestion: spec.canonical ? closestCanonical(spec, key) : null
+        });
+      } else if(normalizeKey(group) !== key){
+        // Recognized, but typed differently from the canonical name — worth
+        // showing so a coordinator can see what got grouped with what.
+        VOCAB_FIXES.push({section: sectionLabel, field, from: original, to: group, row: where});
+      }
+    });
+  });
+  return rows;
+}
+
+// Builds the pill list for a field: one pill per group, labelled with the
+// FIRST spelling that actually appears in the sheet, so the pills read the
+// way the coordinators wrote them.
+function vocabPills(rows, field){
+  const order = [], labels = {};
+  (rows || []).forEach(r => {
+    const original = (r[field] || "").toString().trim();
+    if(!original) return;
+    const group = r[groupField(field)] || vocabGroup(field, original);
+    if(!(group in labels)){ labels[group] = original; order.push(group); }
+  });
+  return order.map(g => ({group: g, label: labels[g]}));
+}
+
+// The label to show for a selected group — again the sheet's own wording,
+// so the active-filter chip matches the pill the user clicked.
+function vocabLabel(rows, field, group){
+  const hit = vocabPills(rows, field).find(p => p.group === group);
+  return hit ? hit.label : group;
+}
+
+// True when a row belongs to the selected pill's group.
+function vocabMatches(r, field, group){
+  if(!group) return true;
+  return (r[groupField(field)] || vocabGroup(field, r[field])) === group;
+}
+
+// One call site for every feed, so a new sheet only needs a line here.
+/* ---------------- Sheet QA report (?check=1) ------------------------------
+   Coordinator-only. Normal visitors never see this. Add ?check=1 to the URL
+   —  e.g. .../ENT-IG-Website/?check=1  — to get a list of every value the
+   site couldn't interpret, what it did instead, and the closest match.
+   This is what makes a dropdown typo visible instead of silent.
+--------------------------------------------------------------------------*/
+function qaReportRequested(){
+  try{ return new URLSearchParams(location.search).get("check") === "1"; }
+  catch(e){ return false; }
+}
+function renderQaReport(){
+  if(!qaReportRequested()) return;
+  const failedFeeds = Object.entries(FEED_STATE).filter(([, s]) => s === "error").map(([k]) => k);
+  const esc2 = esc;
+
+  const section = (title, body) => body ? `<h3>${esc2(title)}</h3>${body}` : "";
+  const issues = VOCAB_ISSUES.length ? `<ul>${VOCAB_ISSUES.map(i => `
+      <li><b>${esc2(i.field)}</b> — “${esc2(i.value)}”<br>
+      <span class="qa-where">${esc2(i.section)} · ${esc2(i.row)}</span><br>
+      ${i.suggestion ? `<span class="qa-fix">Did you mean “${esc2(i.suggestion)}”?</span>` : `<span class="qa-fix">Not on the approved list — shown as typed, filtered on its own.</span>`}</li>`).join("")}</ul>` : "";
+  const fixes = VOCAB_FIXES.length ? `<ul>${VOCAB_FIXES.map(f => `
+      <li><b>${esc2(f.field)}</b> — “${esc2(f.from)}” shows as typed, and is filtered together with “${esc2(f.to)}”<br>
+      <span class="qa-where">${esc2(f.section)} · ${esc2(f.row)}</span></li>`).join("")}</ul>` : "";
+  const config = VOCAB_CONFIG_ISSUES.length ? `<ul>${VOCAB_CONFIG_ISSUES.map(c => `<li>${esc2(c)}</li>`).join("")}</ul>` : "";
+  const feeds = failedFeeds.length ? `<ul>${failedFeeds.map(f => `<li>The <b>${esc2(f)}</b> sheet did not load — check that it is still published to the web.</li>`).join("")}</ul>` : "";
+
+  const clean = !VOCAB_ISSUES.length && !VOCAB_FIXES.length && !VOCAB_CONFIG_ISSUES.length && !failedFeeds.length;
+
+  const panel = document.createElement("div");
+  panel.className = "qa-panel";
+  panel.setAttribute("role", "dialog");
+  panel.setAttribute("aria-modal", "true");
+  panel.setAttribute("aria-label", "Sheet QA report");
+  panel.innerHTML = `
+    <div class="qa-inner">
+      <div class="qa-head">
+        <h2>Sheet check</h2>
+        <button type="button" class="qa-close" aria-label="Close report">Close</button>
+      </div>
+      ${clean ? `<p class="qa-clean">Everything checks out. No unrecognized values, and every sheet loaded.</p>` : ""}
+      ${section("Needs attention in the sheet", issues)}
+      ${section("Grouped together in the filters", fixes)}
+      ${section("Sheets that did not load", feeds)}
+      ${section("Vocabulary configuration", config)}
+      <p class="qa-foot">Only you see this. Remove <code>?check=1</code> from the URL for the normal site.</p>
+    </div>`;
+  document.body.appendChild(panel);
+
+  const close = () => { panel.remove(); document.removeEventListener("keydown", onKey); };
+  const onKey = (e) => { if(e.key === "Escape") close(); };
+  panel.querySelector(".qa-close").addEventListener("click", close);
+  document.addEventListener("keydown", onKey);
+  panel.querySelector(".qa-close").focus();
+}
+
+function normalizeAllFeeds(){
+  VOCAB_ISSUES.length = 0;
+  VOCAB_FIXES.length = 0;
+  applyVocabulary(DATA.research, ["Subspecialty","Research Type","Status"], "Research Directory", "Principal Investigator");
+  applyVocabulary(DATA.shadowing, ["Specialty"], "Shadowing", "Name");
+}
+
 // Research Directory rows default to "recruiting" when Status is left blank —
 // the source sheet this mirrors only lists active opportunities, so a
 // coordinator should only have to touch Status to mark one filled.
-function isRecruiting(v){ return !statusIs(v, "Not Recruiting"); }
+// Resolution now goes through the Status vocabulary above, so "Closed",
+// "Filled", "on hold" and "not recruiting until spring" all register.
+// A value we can't interpret at all still shows as recruiting (better to
+// surface an opportunity than hide it) and is listed in the ?check=1 report.
+function isRecruiting(v){
+  const resolved = VOCAB.Status.resolve(normalizeKey(v));
+  return resolved === null ? true : resolved === "Recruiting";
+}
 // Shadowing has no separate "Status" field — the real sign-up sheet's two
 // name slots ARE the status. A slot counts as open when its cell is blank.
 function openSlotCount(r){ return (r["Student 1:"]?.trim() ? 0 : 1) + (r["Student 2:"]?.trim() ? 0 : 1); }
@@ -1058,15 +1358,15 @@ function renderResearch(){
   const savedOnly = document.getElementById("research-saved-only").checked;
 
   const chips = [];
-  if(researchType) chips.push({key:"type", label:researchType});
-  if(researchSub) chips.push({key:"sub", label:researchSub});
+  if(researchType) chips.push({key:"type", label:vocabLabel(DATA.research, "Research Type", researchType)});
+  if(researchSub) chips.push({key:"sub", label:vocabLabel(DATA.research, "Subspecialty", researchSub)});
   if(recruitingOnly) chips.push({key:"recruiting", label:"Recruiting"});
   if(savedOnly) chips.push({key:"saved", label:"Saved"});
   renderActiveFilters("research-active-filters", chips);
 
   let rows = DATA.research.filter(r => {
-    if(researchType && r["Research Type"] !== researchType) return false;
-    if(researchSub && r.Subspecialty !== researchSub) return false;
+    if(researchType && !vocabMatches(r, "Research Type", researchType)) return false;
+    if(researchSub && !vocabMatches(r, "Subspecialty", researchSub)) return false;
     if(recruitingOnly && !isRecruiting(r.Status)) return false;
     if(savedOnly && !SAVED.has(listingId("research", r, "Principal Investigator", "Project Description"))) return false;
     if(q){
@@ -1110,10 +1410,10 @@ function renderResearch(){
   `;}).join("");
 }
 function buildResearchPills(){
-  const types = [...new Set(DATA.research.map(r => r["Research Type"]).filter(Boolean))];
-  const subs = [...new Set(DATA.research.map(r => r.Subspecialty).filter(Boolean))];
-  document.getElementById("research-pills-role").innerHTML = types.map(t => `<button class="pill" data-type="type" data-val="${esc(t)}" aria-pressed="false">${esc(t)}</button>`).join("");
-  document.getElementById("research-pills-sub").innerHTML = subs.map(s => `<button class="pill" data-type="sub" data-val="${esc(s)}" aria-pressed="false">${esc(s)}</button>`).join("");
+  const types = vocabPills(DATA.research, "Research Type");
+  const subs = vocabPills(DATA.research, "Subspecialty");
+  document.getElementById("research-pills-role").innerHTML = types.map(t => `<button class="pill" data-type="type" data-val="${esc(t.group)}" aria-pressed="false">${esc(t.label)}</button>`).join("");
+  document.getElementById("research-pills-sub").innerHTML = subs.map(s => `<button class="pill" data-type="sub" data-val="${esc(s.group)}" aria-pressed="false">${esc(s.label)}</button>`).join("");
   document.querySelectorAll('#panel-research .pill').forEach(btn => {
     btn.addEventListener("click", () => {
       const type = btn.dataset.type, val = btn.dataset.val;
@@ -1144,13 +1444,13 @@ function renderShadowing(){
   const savedOnly = document.getElementById("shadow-saved-only").checked;
 
   const chips = [];
-  if(shadowSpec) chips.push({key:"spec", label:shadowSpec});
+  if(shadowSpec) chips.push({key:"spec", label:vocabLabel(DATA.shadowing, "Specialty", shadowSpec)});
   if(openOnly) chips.push({key:"open", label:"Open"});
   if(savedOnly) chips.push({key:"saved", label:"Saved"});
   renderActiveFilters("shadow-active-filters", chips);
 
   let rows = DATA.shadowing.filter(r => {
-    if(shadowSpec && r.Specialty !== shadowSpec) return false;
+    if(shadowSpec && !vocabMatches(r, "Specialty", shadowSpec)) return false;
     if(openOnly && openSlotCount(r) === 0) return false;
     if(savedOnly && !SAVED.has(listingId("shadowing", r, "Name", "Specialty"))) return false;
     if(q){
@@ -1188,8 +1488,8 @@ function renderShadowing(){
   `;}).join("");
 }
 function buildShadowPills(){
-  const specs = [...new Set(DATA.shadowing.map(r => r.Specialty).filter(Boolean))];
-  document.getElementById("shadow-pills-spec").innerHTML = specs.map(s => `<button class="pill" data-val="${esc(s)}" aria-pressed="false">${esc(s)}</button>`).join("");
+  const specs = vocabPills(DATA.shadowing, "Specialty");
+  document.getElementById("shadow-pills-spec").innerHTML = specs.map(s => `<button class="pill" data-val="${esc(s.group)}" aria-pressed="false">${esc(s.label)}</button>`).join("");
   document.querySelectorAll('#panel-shadowing .pill').forEach(btn => {
     btn.addEventListener("click", () => {
       const val = btn.dataset.val;
@@ -1640,6 +1940,7 @@ document.addEventListener("keydown", (e) => {
     loadCSV(IDEAS_CSV_URL, "ideas"),
   ]);
   DATA = { announcements, events, research, shadowing, accEast, ohancaw, ideas };
+  normalizeAllFeeds();   // resolve controlled columns before anything renders
   feedsReady = true;
 
   loadingBar.style.width = "100%";
@@ -1667,6 +1968,10 @@ document.addEventListener("keydown", (e) => {
   buildSearchIndex();
 
   switchPanel((window.location.hash || "#announcements").slice(1));
+
+  // After switchPanel, which moves focus to the page title — otherwise the
+  // report opens without keyboard focus landing inside it.
+  renderQaReport();   // no-op unless ?check=1 is in the URL
 
   document.getElementById("research-search").addEventListener("input", renderResearch);
   document.getElementById("research-recruiting-only").addEventListener("change", renderResearch);
