@@ -828,17 +828,24 @@ function esc(s){
 // different teams — "yes" vs "Yes", a trailing space — so every Yes/No and
 // status comparison goes through these instead of a bare === match.
 function isYes(v){ return (v || "").toString().trim().toLowerCase() === "yes"; }
-// The Chandler flag comes from a checkbox on the intake form, so its sheet
+// The Chandler flag comes from a question on the intake form, so its sheet
 // column IS the question text and is liable to get reworded ("Is this a
 // Chandler project?", "Chandler Project"). Match any header mentioning
-// Chandler rather than one exact string. A ticked Forms checkbox writes the
-// option label ("Yes", or the option's own wording); an unticked one writes
-// nothing — so any value that isn't blank or an explicit no counts as true.
+// Chandler rather than one exact string.
+//
+// The value is whatever the form wrote: "Yes"/"No" from a Yes/No question, the
+// option's own wording from a single-option checkbox, or nothing at all when
+// it went unanswered. A Checkboxes question also lets someone tick BOTH boxes
+// and write "Yes, No" — ambiguous, so an explicit yes wins and a coordinator
+// can catch it, rather than the row silently reading as either one.
 function isChandler(r){
   for(const key in r){
     if(!key.toLowerCase().includes("chandler")) continue;
     const v = (r[key] || "").toString().trim().toLowerCase();
-    if(v && v !== "no" && v !== "false") return true;
+    if(!v) continue;                               // unanswered
+    if(/\byes\b|\btrue\b/.test(v)) return true;    // "Yes", and "Yes, No"
+    if(/^(no|not|false|n|0)\b/.test(v)) continue;  // "No", "Not a Chandler project"
+    return true;                                   // a ticked box's own label
   }
   return false;
 }
