@@ -131,6 +131,7 @@ main{min-height:260px}
 .dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
 .tag-row{display:flex;flex-wrap:wrap;gap:6px}
 .tag{font-size:.75rem;padding:4px 9px;color:var(--muted);background:var(--paper);border-radius:5px}
+.tag.tag-chandler{background:var(--orange-soft);color:var(--orange-text);font-weight:700}
 .proj-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;color:var(--green)}
 .desc{font-size:1rem;line-height:1.65;color:var(--muted);white-space:pre-line;overflow-wrap:anywhere}
 .card-foot{margin-top:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line-soft);padding-top:16px}
@@ -407,6 +408,7 @@ footer{border-top:1px solid var(--line);padding:26px 0 32px;font-size:.875rem;co
         <div class="search-row">
           <input aria-label="Search research projects" id="research-search" type="text" placeholder="Search by name, project, or keyword…" />
           <label class="toggle"><input type="checkbox" id="research-recruiting-only" /> Recruiting only</label>
+          <label class="toggle"><input type="checkbox" id="research-chandler-only" /> Chandler only</label>
           <label class="toggle"><input type="checkbox" id="research-saved-only" /> Saved only</label>
         </div>
         <div id="research-pills-role" class="pill-groups"></div>
@@ -584,6 +586,10 @@ footer{border-top:1px solid var(--line);padding:26px 0 32px;font-size:.875rem;co
         <div><h2>Contact</h2></div>
       </div>
       <div class="contact-grid">
+        <div class="contact-card">
+          <span class="role-tag">Faculty Advisor</span>
+          <div class="email-row"><strong>Dr. David Lerner</strong> — <a href="mailto:Davidlerner@med.miami.edu">Davidlerner@med.miami.edu</a><button class="copy-btn" data-email="Davidlerner@med.miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
+        </div>
         <div class="contact-card">
           <span class="role-tag">Co-Presidents</span>
           <div class="email-row"><strong>Niko DiStefano</strong> — <a href="mailto:nvd10@miami.edu">nvd10@miami.edu</a><button class="copy-btn" data-email="nvd10@miami.edu" title="Copy email" aria-label="Copy email address"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5.5" y="5.5" width="8" height="8" rx="1.3" stroke="currentColor" stroke-width="1.3"/><path d="M3 10.5V3.3C3 2.6 3.6 2 4.3 2H10.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button></div>
@@ -822,6 +828,20 @@ function esc(s){
 // different teams — "yes" vs "Yes", a trailing space — so every Yes/No and
 // status comparison goes through these instead of a bare === match.
 function isYes(v){ return (v || "").toString().trim().toLowerCase() === "yes"; }
+// The Chandler flag comes from a checkbox on the intake form, so its sheet
+// column IS the question text and is liable to get reworded ("Is this a
+// Chandler project?", "Chandler Project"). Match any header mentioning
+// Chandler rather than one exact string. A ticked Forms checkbox writes the
+// option label ("Yes", or the option's own wording); an unticked one writes
+// nothing — so any value that isn't blank or an explicit no counts as true.
+function isChandler(r){
+  for(const key in r){
+    if(!key.toLowerCase().includes("chandler")) continue;
+    const v = (r[key] || "").toString().trim().toLowerCase();
+    if(v && v !== "no" && v !== "false") return true;
+  }
+  return false;
+}
 function statusIs(v, target){ return (v || "").toString().trim().toLowerCase() === target.toLowerCase(); }
 /* ---------------- Controlled vocabulary ----------------------------------
    Subspecialty, Research Type, Status and Specialty are meant to be
@@ -1370,12 +1390,14 @@ function renderActiveFilters(containerId, chips){
 function renderResearch(){
   const q = document.getElementById("research-search").value.trim().toLowerCase();
   const recruitingOnly = document.getElementById("research-recruiting-only").checked;
+  const chandlerOnly = document.getElementById("research-chandler-only").checked;
   const savedOnly = document.getElementById("research-saved-only").checked;
 
   const chips = [];
   if(researchType) chips.push({key:"type", label:vocabLabel(publishedResearch(), "Research Type", researchType)});
   if(researchSub) chips.push({key:"sub", label:vocabLabel(publishedResearch(), "Subspecialty", researchSub)});
   if(recruitingOnly) chips.push({key:"recruiting", label:"Recruiting"});
+  if(chandlerOnly) chips.push({key:"chandler", label:"Chandler"});
   if(savedOnly) chips.push({key:"saved", label:"Saved"});
   renderActiveFilters("research-active-filters", chips);
 
@@ -1383,9 +1405,10 @@ function renderResearch(){
     if(researchType && !vocabMatches(r, "Research Type", researchType)) return false;
     if(researchSub && !vocabMatches(r, "Subspecialty", researchSub)) return false;
     if(recruitingOnly && !isRecruiting(r.Status)) return false;
+    if(chandlerOnly && !isChandler(r)) return false;
     if(savedOnly && !SAVED.has(listingId("research", r, "Principal Investigator", "Project Description"))) return false;
     if(q){
-      const hay = [r["Principal Investigator"], r["Project Description"], r.Subspecialty, r["Research Type"]].join(" ").toLowerCase();
+      const hay = [r["Principal Investigator"], r["Project Description"], r.Subspecialty, r["Research Type"], isChandler(r) ? "Chandler" : ""].join(" ").toLowerCase();
       if(!hay.includes(q)) return false;
     }
     return true;
@@ -1408,7 +1431,7 @@ function renderResearch(){
           <button class="save-btn ${saved?'saved':''}" aria-pressed="${saved}" data-id="${esc(id)}" data-section="research" title="${saved?'Remove from saved':'Save for later'}" aria-label="${saved?'Remove from saved':'Save for later'}">${STAR_ICON(saved)}</button>
         </div>
       </div>
-      <div class="tag-row">${r.Subspecialty ? `<span class="tag">${esc(r.Subspecialty)}</span>` : ""}</div>
+      <div class="tag-row">${isChandler(r) ? `<span class="tag tag-chandler">Chandler project</span>` : ""}${r.Subspecialty ? `<span class="tag">${esc(r.Subspecialty)}</span>` : ""}</div>
       <div>
         <div class="proj-label">Project</div>
         <div class="desc">${esc(r["Project Description"])}</div>
@@ -1447,6 +1470,7 @@ document.getElementById("research-active-filters").addEventListener("click", (e)
   if(key === "type"){ researchType = null; document.querySelectorAll('#panel-research .pill[data-type="type"]').forEach(b=>b.setAttribute("aria-pressed","false")); }
   if(key === "sub"){ researchSub = null; document.querySelectorAll('#panel-research .pill[data-type="sub"]').forEach(b=>b.setAttribute("aria-pressed","false")); }
   if(key === "recruiting") document.getElementById("research-recruiting-only").checked = false;
+  if(key === "chandler") document.getElementById("research-chandler-only").checked = false;
   if(key === "saved") document.getElementById("research-saved-only").checked = false;
   renderResearch();
 });
@@ -1652,7 +1676,7 @@ function buildSearchIndex(){
     SEARCH_INDEX.push({section:"Events", panel:"events", title:r.Title||"Untitled", sub:[r.Date, r.Location].filter(Boolean).join(" · ")});
   });
   publishedResearch().forEach(r => {
-    SEARCH_INDEX.push({section:"Research", panel:"research", title:r["Principal Investigator"]||"Untitled project", sub:[r.Subspecialty, (r["Project Description"]||"").slice(0,60)].filter(Boolean).join(" · ")});
+    SEARCH_INDEX.push({section:"Research", panel:"research", title:r["Principal Investigator"]||"Untitled project", sub:[isChandler(r) ? "Chandler" : "", r.Subspecialty, (r["Project Description"]||"").slice(0,60)].filter(Boolean).join(" · ")});
   });
   DATA.shadowing.forEach(r => {
     SEARCH_INDEX.push({section:"Shadowing", panel:"shadowing", title:r.Name||"Untitled", sub:[r.Specialty, (r.Comments||"").slice(0,60)].filter(Boolean).join(" · ")});
@@ -1990,6 +2014,7 @@ document.addEventListener("keydown", (e) => {
 
   document.getElementById("research-search").addEventListener("input", renderResearch);
   document.getElementById("research-recruiting-only").addEventListener("change", renderResearch);
+  document.getElementById("research-chandler-only").addEventListener("change", renderResearch);
   document.getElementById("research-saved-only").addEventListener("change", renderResearch);
   document.getElementById("shadow-search").addEventListener("input", renderShadowing);
   document.getElementById("shadow-open-only").addEventListener("change", renderShadowing);
