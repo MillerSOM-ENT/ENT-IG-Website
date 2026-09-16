@@ -8,7 +8,7 @@
 <meta property="og:title" content="ENT Interest Group — University of Miami">
 <meta property="og:description" content="Announcements, events, research and shadowing opportunities, and OHANCAW updates, all in one place.">
 <meta property="og:type" content="website">
-<link rel="icon" type="image/png" href="favicon.png">
+<link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -74,7 +74,7 @@ nav{display:flex;align-items:center;gap:3px}
 .mobile-nav-toggle[aria-expanded="true"] .hamburger-bar:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 header.hero{background:white;border-bottom:1px solid var(--line)}
 .header-inner{padding-block:32px}
-.eyebrow{color:var(--orange-text);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;margin-bottom:14px}
+.eyebrow{display:none}
 .title{font-size:clamp(2rem,3.5vw,3rem);line-height:1.1;font-weight:700;max-width:780px}
 #hero-title-b{color:var(--green)}
 .sub{max-width:620px;color:var(--muted);line-height:1.65;margin:16px 0 0}
@@ -196,6 +196,7 @@ main{min-height:260px}
 #acc-east-list .event-card{padding:20px;border-left-color:var(--green)}
 .submit-banner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;padding:24px;background:var(--green-soft);border:1px solid #c7dccd;border-radius:var(--radius);margin-bottom:24px}
 .submit-banner>div{flex:1 1 420px}
+.submit-banner>.submit-actions{flex:0 1 auto;display:flex;align-items:stretch;justify-content:flex-end;flex-wrap:wrap;gap:10px}
 .submit-banner h3{margin-bottom:8px}
 .submit-banner p{font-size:1rem;color:var(--muted);margin:0;max-width:760px;line-height:1.65}
 .resource-cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
@@ -282,7 +283,7 @@ footer{border-top:1px solid var(--line);padding:26px 0 32px;font-size:.875rem;co
  .toggle{flex:1;justify-content:center;padding:10px 8px}
  .grid,.resource-cols,.about-grid{grid-template-columns:1fr}
  .card,.contact-card,.resource-col{padding:20px}
- .submit-banner{padding:20px}.submit-banner>div{flex-basis:100%}
+ .submit-banner{padding:20px}.submit-banner>div{flex-basis:100%}.submit-banner>.submit-actions{justify-content:stretch}.submit-actions .btn-primary,.submit-actions .btn-outline{width:100%}
  .ann-item{grid-template-columns:1fr;gap:8px}
  .event-card{flex-direction:column;padding:20px}
  .event-flyer{width:100%;max-width:260px}
@@ -299,6 +300,20 @@ footer{border-top:1px solid var(--line);padding:26px 0 32px;font-size:.875rem;co
  a,button,.card{transition:background-color .15s ease,border-color .15s ease,box-shadow .15s ease}
 }
 
+.student-network{margin-bottom:40px;padding-bottom:32px;border-bottom:1px solid var(--line)}
+.student-network h2{margin-bottom:10px}
+.student-network-intro{max-width:70ch;color:var(--muted)}
+.student-network-paths{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin:24px 0}
+.student-network-paths h3{font-size:1.15rem;margin-bottom:10px}
+.student-network-paths p{max-width:60ch}
+.student-network-paths .btn-primary,.student-network-paths .btn-outline{min-height:44px;white-space:normal;text-align:center}
+.student-network-pending{font-size:.9rem;font-weight:600;color:var(--orange-text)}
+.student-network-notes{font-size:.9rem;color:var(--muted);max-width:75ch}
+.student-network details{margin-top:16px}
+.student-network summary{cursor:pointer;color:var(--green);font-weight:600;min-height:44px;padding-block:10px}
+.student-network :is(a,summary):focus-visible{outline:3px solid var(--green);outline-offset:4px}
+.student-network details p{margin-top:10px}
+@media(max-width:680px){.student-network-paths{grid-template-columns:1fr;gap:24px}.student-network{margin-bottom:32px;padding-bottom:24px}}
 </style>
 </head>
 <body>
@@ -400,8 +415,36 @@ footer{border-top:1px solid var(--line);padding:26px 0 32px;font-size:.875rem;co
   <!-- ================= RESEARCH DIRECTORY ================= -->
   <section id="panel-research" class="panel" data-folio="03">
     <div class="section-pad">
+      <section id="student-network" class="student-network" aria-labelledby="student-network-title">
+        <h2 id="student-network-title">Student Research Network</h2>
+        <p class="student-network-intro">Help ENT faculty and residents find students whose interests, skills, and availability fit their research.</p>
+        <div class="student-network-paths">
+          <div>
+            <h3>Students: share your interests</h3>
+            <p>Submit a research profile for coordinator review. No previous research experience is required to express interest.</p>
+            <a id="student-profile-link" class="btn-primary" target="_blank" rel="noopener noreferrer" hidden>Create a student profile</a>
+            <p id="student-profile-pending" class="student-network-pending">Student profile registration is not open yet.</p>
+          </div>
+          <div>
+            <h3>Faculty &amp; residents: find collaborators</h3>
+            <p>Browse approved profiles in a public, view-only directory and contact students directly about a potential project.</p>
+            <a id="student-directory-link" class="btn-outline" target="_blank" rel="noopener noreferrer" hidden>Browse approved student profiles</a>
+            <p id="student-directory-pending" class="student-network-pending">The approved student directory is not available yet.</p>
+            <p>Have a project ready? <a href="https://docs.google.com/forms/d/e/1FAIpQLSc7uPNHRl6wTM5ry6hEumAmxc489L3uoucFNPyLLfcvgAgexw/viewform" target="_blank" rel="noopener noreferrer">Submit a research project</a> for coordinator review.</p>
+          </div>
+        </div>
+        <div class="student-network-notes">
+          <p>Approved profiles are available through a public, view-only directory. The only direct identifiers shown are the student's name and university email. Participation is voluntary and does not guarantee a project or placement.</p>
+          <details>
+            <summary>How review, access, and profile updates work</summary>
+            <p>Coordinators review submissions before approving them for the public directory. Research interests, skills and availability help faculty and residents identify potential collaborators.</p>
+            <p>After submitting, save your personal response-edit link. Use that link to update your profile; the registration button opens a new response. Changed profiles are removed from the directory until coordinators review them again. To pause or remove your profile, contact the <a href="mailto:ixa588@miami.edu,tek37@miami.edu">Research Coordinators</a>.</p>
+            <p>Do not include patient information, confidential project details, passwords, or student ID numbers. Reported chart access does not authorize access for a research project.</p>
+          </details>
+        </div>
+      </section>
       <div class="section-head">
-        <div><h2>Research Directory</h2><p>Faculty, residents, and fellows currently open to student collaborators.</p></div>
+        <div><h2>Research projects</h2><p>Browse approved projects and contact the listed investigator. Use Recruiting only to find current openings.</p></div>
         <span class="maintainer">Research Coordinators</span>
       </div>
       <div class="controls">
@@ -499,10 +542,13 @@ footer{border-top:1px solid var(--line);padding:26px 0 32px;font-size:.875rem;co
       </div>
       <div class="submit-banner">
         <div>
-          <h3>Before you go</h3>
-          <p>Scrubs required. Fill out the sign-up form at least 3 days before your shadowing date. Questions: Carlos Lange Nava — <a href="mailto:cxl1033@miami.edu">cxl1033@miami.edu</a>.</p>
+          <h3>Claim your date, then complete the required form</h3>
+          <p>Enter your name beside an available ACC East slot, then submit the pre-shadowing form at least 3 days before your date. Scrubs are required. Questions: Carlos Lange Nava — <a href="mailto:cxl1033@miami.edu">cxl1033@miami.edu</a>.</p>
         </div>
-        <a class="btn-outline" href="https://docs.google.com/forms/d/1YYAWfGdauDFKzofC-XlHpHR05cgWE4xdb3QffdbVVBs/viewform" target="_blank" rel="noopener">Fill out the pre-shadowing form <svg class="icon-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <div class="submit-actions">
+          <a class="btn-primary" href="https://docs.google.com/spreadsheets/d/1N2XtWhp-RbmcV9MVS7fE997iMk36wFhuAljgTgU9Gv0/edit" target="_blank" rel="noopener">Open ACC sign-up sheet <svg class="icon-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a class="btn-outline" href="https://docs.google.com/forms/d/1YYAWfGdauDFKzofC-XlHpHR05cgWE4xdb3QffdbVVBs/viewform" target="_blank" rel="noopener">Complete pre-shadowing form <svg class="icon-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
       </div>
       <div id="acc-east-list" class="event-list"></div>
     </div>
@@ -515,7 +561,7 @@ footer{border-top:1px solid var(--line);padding:26px 0 32px;font-size:.875rem;co
         <div><h2>OHANCAW</h2><p>Oral, Head &amp; Neck Cancer Awareness Week.</p></div>
         <span class="maintainer">OHANCAW Committee</span>
       </div>
-      <div class="placeholder-banner">
+      <div class="placeholder-banner" id="ohancaw-pending">
         Details for this year's OHANCAW will be posted here once confirmed.
       </div>
       <div class="about-grid">
@@ -536,12 +582,12 @@ footer{border-top:1px solid var(--line);padding:26px 0 32px;font-size:.875rem;co
     <div class="section-pad">
       <div class="section-head">
         <div><h2>Ideas &amp; Q&amp;A</h2><p>Ask a question or suggest a research idea that doesn't have a mentor yet.</p></div>
-        <span class="maintainer">Research Coordinators</span>
+        <span class="maintainer">Your selected team</span>
       </div>
       <div class="submit-banner">
         <div>
           <h3>Have a question or an idea?</h3>
-          <p>Send a question or research idea for coordinator review. Nothing is posted automatically.</p>
+          <p>Choose a topic below to prepare an email to the right team. Nothing is sent or posted automatically.</p>
         </div>
         <a class="btn-primary" id="ideas-submit" href="#contact" target="_blank" rel="noopener">Contact the coordinators <svg class="icon-arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
       </div>
@@ -656,13 +702,49 @@ footer{border-top:1px solid var(--line);padding:26px 0 32px;font-size:.875rem;co
 // ============================================================
 const ANNOUNCEMENTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSZ0K34jl-0Y394yD6tEXhVYJdsGUMu7IkbE51taOLs9b1Eqq0dlLTOGScLk2-XnbPzRyOOKGtHGmUB/pub?output=csv";
 const EVENTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRmNJaJSDf_e6lqnghCTPMPZxt2e7ZeF5j21TMaAnTRcuybUeY-sRGn6mSSZAMr35OYQkyFlaEsDxFn/pub?output=csv";
-const RESEARCH_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRtBZQpYSvWVjX4Boz_whtZm-34Fcc7jal2aNBPGnhgdmGrBhz6Bm7K1fw09AP-eCdKEIyLfIETI2nX/pub?gid=4138343&single=true&output=csv";  // form responses sheet — see "Published" gate
-const SHADOWING_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQaV6v5yUxnfU1puFtBzlkBJhk6cqS9F9tdIS0U0WptiHtvGUhAV7k6QP9Gi4s6VaEC63ZNJpXzyLlq/pub?output=csv";
-const ACC_EAST_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vToNTUSEiFbZmzb1Iit6cRx47fDPPQ2BtCIiu3G1jKiXMg7yBE0RfyRO5kovZT-k96qeH8ZJKmVVz91/pub?output=csv";
-const OHANCAW_CSV_URL = "";
-const IDEAS_CSV_URL = "";
+const RESEARCH_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSZ0K34jl-0Y394yD6tEXhVYJdsGUMu7IkbE51taOLs9b1Eqq0dlLTOGScLk2-XnbPzRyOOKGtHGmUB/pub?gid=91626008&single=true&output=csv";
+const SHADOWING_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQaV6v5yUxnfU1puFtBzlkBJhk6cqS9F9tdIS0U0WptiHtvGUhAV7k6QP9Gi4s6VaEC63ZNJpXzyLlq/pub?gid=91626003&single=true&output=csv";
+const ACC_EAST_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vToNTUSEiFbZmzb1Iit6cRx47fDPPQ2BtCIiu3G1jKiXMg7yBE0RfyRO5kovZT-k96qeH8ZJKmVVz91/pub?gid=91626004&single=true&output=csv";
+// Public-only connections in the existing website workbook. Teams edit their
+// own sheets; these protected tabs import only each team's Website output.
+const OHANCAW_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSZ0K34jl-0Y394yD6tEXhVYJdsGUMu7IkbE51taOLs9b1Eqq0dlLTOGScLk2-XnbPzRyOOKGtHGmUB/pub?gid=91626006&single=true&output=csv";
+const IDEAS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSZ0K34jl-0Y394yD6tEXhVYJdsGUMu7IkbE51taOLs9b1Eqq0dlLTOGScLk2-XnbPzRyOOKGtHGmUB/pub?gid=91626007&single=true&output=csv";
 
-const IDEAS_FORM_URL = ""; // Add the final public form URL when ready.
+// Questions use the email composer below; no separate FAQ intake form is needed.
+
+// Approved profiles are available through a public, view-only Sheet link. The
+// private intake remains separate and is never used as a public website feed.
+const STUDENT_PROFILE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSf4mIZdDLwmuDSmlyBWziQnykpdVGf86_kw6Mmzx8tphWKFoA/viewform";
+const STUDENT_DIRECTORY_URL = "https://docs.google.com/spreadsheets/d/1CeedvBtpmRRBNW6sDbky-qN5pr0D6minfcCxqTwc2yY/edit";
+
+function studentNetworkUrl(value, kind){
+  try {
+    const url = new URL(value);
+    if(url.protocol !== "https:" || url.username || url.password) return null;
+    if(kind === "form"){
+      if(url.hostname === "forms.gle" && url.pathname.length > 1) return url.href;
+      if(url.hostname === "docs.google.com" && /^\/forms\/d\/(?:e\/)?[^/]+\/viewform\/?$/.test(url.pathname)) return url.href;
+    }
+    // A normal public, view-only Sheet link, not a CSV feed. The private intake
+    // remains restricted and is never linked from the website.
+    if(kind === "directory" && url.hostname === "docs.google.com" &&
+      /^\/spreadsheets\/d\/(?!e\/)[^/]+\/(?:edit|view)\/?$/.test(url.pathname) &&
+      !url.searchParams.has("output")) return url.href;
+  } catch {}
+  return null;
+}
+function setupStudentNetwork(){
+  for(const [kind,value,linkId,pendingId] of [
+    ["form",STUDENT_PROFILE_FORM_URL,"student-profile-link","student-profile-pending"],
+    ["directory",STUDENT_DIRECTORY_URL,"student-directory-link","student-directory-pending"]
+  ]){
+    const link=document.getElementById(linkId);
+    const pending=document.getElementById(pendingId);
+    const url=studentNetworkUrl(value,kind);
+    link.hidden=!url;pending.hidden=!!url;
+    if(url) link.href=url; else link.removeAttribute("href");
+  }
+}
 
 // Each topic in the "Topic" dropdown routes the prepared email to the people
 // who actually own that area, instead of sending everything to one inbox.
@@ -721,7 +803,7 @@ questionForm.addEventListener("input", () => {
 
 const FAQ_ITEMS = [
   {q:"How do I actually get involved in a research project?", a:"Email the contact listed on that project's card directly. Mention you saw it on the ENT IG site, briefly describe your background, and ask for 15–20 minutes to talk."},
-  {q:"How do shadowing sign-ups work?", a:"Arrange clinic or OR shadowing with the attending, then claim an available slot on the shared sign-up sheet. For ACC Clinic East, complete the pre-shadowing form at least three days before your date."},
+  {q:"How do shadowing sign-ups work?", a:"For individual-attending shadowing, arrange clinic or OR shadowing with the attending and enter your name on the shared sign-up sheet. For ACC Clinic East, enter your name beside an available date, then complete the pre-shadowing form at least three days before that date."},
   {q:"Can I suggest an idea that doesn't have a mentor yet?", a:"Yes — use the Ideas & Q&A tab. Coordinators review submissions and may help match it with faculty interest."}
 ];
 
@@ -1068,7 +1150,8 @@ function vocabMatches(r, field, group){
 
 // One call site for every feed, so a new sheet only needs a line here.
 /* ---------------- Sheet QA report (?check=1) ------------------------------
-   Coordinator-only. Normal visitors never see this. Add ?check=1 to the URL
+   Public diagnostic view; this is not an authenticated administrator page.
+   Add ?check=1 to the URL
    —  e.g. .../ENT-IG-Website/?check=1  — to get a list of every value the
    site couldn't interpret, what it did instead, and the closest match.
    This is what makes a dropdown typo visible instead of silent.
@@ -1111,7 +1194,7 @@ function renderQaReport(){
       ${section("Grouped together in the filters", fixes)}
       ${section("Sheets that did not load", feeds)}
       ${section("Vocabulary configuration", config)}
-      <p class="qa-foot">Only you see this. Remove <code>?check=1</code> from the URL for the normal site.</p>
+      <p class="qa-foot">This checks public website data only; it is not a private administrator page. Remove <code>?check=1</code> from the URL for the normal site.</p>
     </div>`;
   document.body.appendChild(panel);
 
@@ -1355,7 +1438,8 @@ function publishedEvents(){ return DATA.events.filter(r => isYes(r.Published)); 
 function upcomingEvents(){ return splitEvents(publishedEvents()).upcoming.map(e => e.row); }
 
 function eventCard(r){
-  const flyerSrc = sanitizeUrl(driveImageUrl(r.Flyer));
+  const flyer = r.Flyer || r["Flyer: Attach Google Drive Share Link (make sure it is set to anyone with link)"] || "";
+  const flyerSrc = sanitizeUrl(driveImageUrl(flyer));
   return `
     <div class="event-card">
       <div>
@@ -1364,7 +1448,7 @@ function eventCard(r){
         ${r.Location ? `<div class="event-loc">${esc(r.Location)}</div>` : ""}
         <div class="event-desc">${esc(r.Description)}</div>
       </div>
-      ${flyerSrc ? `<a class="event-flyer" href="${esc(sanitizeUrl(r.Flyer) || flyerSrc)}" target="_blank" rel="noopener" title="View full flyer"><img src="${esc(flyerSrc)}" alt="${esc(r.Title)} flyer" loading="lazy" onerror="this.closest('.event-flyer').style.display='none'"></a>` : ""}
+      ${flyerSrc ? `<a class="event-flyer" href="${esc(sanitizeUrl(flyer) || flyerSrc)}" target="_blank" rel="noopener" title="View full flyer"><img src="${esc(flyerSrc)}" alt="${esc(r.Title)} flyer" loading="lazy" onerror="this.closest('.event-flyer').style.display='none'"></a>` : ""}
     </div>
   `;
 }
@@ -1588,6 +1672,7 @@ function renderAccEast(){
 function renderOhancaw(){
   const rows = DATA.ohancaw.filter(r => isYes(r.Published));
   const wrap = document.getElementById("ohancaw-list");
+  document.getElementById("ohancaw-pending").hidden = rows.length > 0;
   if(!rows.length){ wrap.innerHTML = FEED_STATE.ohancaw === "error" ? `<div class="empty">${emptyMessage("ohancaw", "")}</div>` : ""; return; }
   wrap.innerHTML = rows.map(r => `
     <div class="ann-item">
@@ -1604,7 +1689,7 @@ function renderIdeas(){
   const wrap = document.getElementById("qa-list");
   const status = document.getElementById("qa-status");
   status.textContent = rows.length ? `${rows.length} published question${rows.length===1?'':'s'}` : "";
-  if(!rows.length){ wrap.innerHTML = `<div class="empty">${emptyMessage("ideas", "No questions published yet. Use the form above and it will reach the right coordinators for your topic.")}</div>`; return; }
+  if(!rows.length){ wrap.innerHTML = `<div class="empty">${emptyMessage("ideas", "No answers published yet. Prepare a question above, then send it from your email app.")}</div>`; return; }
   wrap.innerHTML = rows.map(r => `
     <div class="qa-item">
       ${r.Category ? `<span class="qa-cat">${esc(r.Category)}</span>` : ""}
@@ -1824,7 +1909,7 @@ const PANEL_META = {
   research:      { num:"03", doc:"Research Directory", eyebrow:"Get Involved · Research", titleA:"Explore", titleB:"ENT research.", showStats:false,
                    readout: () => {
                      const n = publishedResearch().filter(r => isRecruiting(r.Status)).length;
-                     return n ? `${n} project${n===1?"":"s"} recruiting right now` : "Nothing recruiting right now — check back soon.";
+                     return n ? `${n} project${n===1?"":"s"} recruiting right now` : "Create a student profile to be considered for future projects.";
                    } },
   shadowing:     { num:"04", doc:"Shadowing", eyebrow:"Get Involved · Shadowing", titleA:"Shadow an", titleB:"attending.", showStats:false,
                    readout: () => {
@@ -1961,6 +2046,7 @@ document.addEventListener("keydown", (e) => {
 
 (async function init(){
   loadSaved();
+  setupStudentNetwork();
 
   const loadingBar = document.getElementById("loading-bar");
   loadingBar.style.width = "35%";
@@ -1969,9 +2055,8 @@ document.addEventListener("keydown", (e) => {
   renderFAQ();
   switchPanel(PANELS.includes(startPanel) ? startPanel : "announcements");
   const formLink = document.getElementById("ideas-submit");
-  const formUrl = sanitizeUrl(IDEAS_FORM_URL);
-  if(formUrl){ formLink.href = formUrl; formLink.textContent = "Submit a question"; formLink.target = "_blank"; }
-  else { formLink.hidden = true; formLink.removeAttribute("target"); }
+  formLink.hidden = true;
+  formLink.removeAttribute("target");
   for(const id of ["ann-list", "event-list", "research-grid", "shadow-grid", "acc-east-list", "qa-list"]){
     document.getElementById(id).innerHTML = '<div class="empty" role="status">Loading updates…</div>';
   }
