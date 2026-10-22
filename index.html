@@ -116,6 +116,31 @@ main{min-height:260px}
 .pill[aria-pressed="true"],.filter-chip{background:var(--green);border-color:var(--green);color:white}
 .filter-chip .x{padding-left:8px}
 .status-line{font-size:.875rem;color:var(--muted);padding:6px 0 14px}
+.opportunity-controls .search-row{margin-top:16px}
+.opportunity-choices{display:flex;flex-wrap:wrap;gap:8px}
+.opportunity-scope{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.opportunity-scope>span{font-size:.875rem;color:var(--muted)}
+.opportunity-list{border-top:1px solid var(--line)}
+.opportunity-item{padding:28px 0;border-bottom:1px solid var(--line);min-width:0}
+.opportunity-overview{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px 40px}
+.opportunity-item h3{font-size:1.25rem;line-height:1.4;max-width:42ch;overflow-wrap:anywhere}
+.opportunity-group{font-size:.875rem;color:var(--muted);margin:8px 0 0}
+.opportunity-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:0}
+.opportunity-facts dt{font-size:.875rem;font-weight:600;color:var(--green);margin-bottom:6px}
+.opportunity-facts dd{margin:0;white-space:pre-line;overflow-wrap:anywhere;line-height:1.6}
+.opportunity-funding{margin-top:20px}
+.opportunity-funding summary{cursor:pointer;min-height:44px;display:list-item;align-content:center;color:var(--green);font-size:.9375rem;font-weight:600;width:fit-content;max-width:100%}
+.opportunity-funding summary:focus-visible{outline:3px solid var(--orange);outline-offset:4px}
+.opportunity-details{max-width:75ch;white-space:pre-line;overflow-wrap:anywhere;color:var(--muted);margin:12px 0 0}
+.opportunity-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.opportunity-list>.empty{margin-top:20px}
+.opportunity-recovery{margin-top:14px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+@media(max-width:700px){
+ .opportunity-overview{grid-template-columns:1fr;gap:20px}
+ .opportunity-item{padding:24px 0}
+ .opportunity-facts{gap:16px}
+}
+@media(max-width:400px){.opportunity-facts{grid-template-columns:1fr}}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:20px}
 .card{background:white;border:1px solid var(--line);border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;gap:14px;min-width:0}
 .card:hover{border-color:#93b29f;box-shadow:var(--card-shadow)}
@@ -343,6 +368,7 @@ footer{border-top:1px solid var(--line);padding:26px 0 32px;font-size:.875rem;co
         <div class="nav-dropdown-menu">
           <button class="navlink" data-panel="research">Research Directory</button>
           <button class="navlink" data-panel="shadowing">Shadowing</button>
+          <button class="navlink" data-panel="meetings">Meetings &amp; Funding Opportunities</button>
           <button class="navlink" data-panel="ohancaw">OHANCAW</button>
         </div>
       </div>
@@ -555,6 +581,35 @@ footer{border-top:1px solid var(--line);padding:26px 0 32px;font-size:.875rem;co
     </div>
   </section>
 
+  <!-- ================= MEETINGS & FUNDING OPPORTUNITIES ================= -->
+  <section id="panel-meetings" class="panel" data-folio="09">
+    <div class="section-pad">
+      <div class="section-head">
+        <div><h2>Meetings &amp; Funding Opportunities</h2><p>Explore meeting dates, abstract deadlines, and funding options. Check the linked organization for current requirements before applying.</p></div>
+        <a class="btn-outline" href="https://docs.google.com/spreadsheets/d/1wxdzJYnK4KS1JigIzsnA03akhTeBFyqOaNEKA4_amx0/edit" target="_blank" rel="noopener noreferrer">Open source sheet</a>
+      </div>
+      <div class="controls opportunity-controls">
+        <div class="opportunity-choices" role="group" aria-label="Browse meetings or funding opportunities">
+          <button type="button" class="pill" data-opportunity-kind="meetings" aria-pressed="true">Meetings</button>
+          <button type="button" class="pill" data-opportunity-kind="grants" aria-pressed="false">Funding opportunities</button>
+        </div>
+        <div class="search-row">
+          <input type="text" id="opportunity-search" aria-label="Search meetings" placeholder="Search meetings…">
+        </div>
+        <div id="meeting-scope" class="opportunity-scope">
+          <span>Meeting scope</span>
+          <div class="opportunity-choices" role="group" aria-label="Meeting scope">
+            <button type="button" class="pill" data-meeting-scope="all" aria-pressed="true">All</button>
+            <button type="button" class="pill" data-meeting-scope="National/International" aria-pressed="false">National/International</button>
+            <button type="button" class="pill" data-meeting-scope="University of Miami Meetings" aria-pressed="false">University of Miami</button>
+          </div>
+        </div>
+      </div>
+      <p id="opportunity-count" class="status-line" role="status" aria-live="polite">Loading meetings…</p>
+      <div id="opportunity-list" class="opportunity-list" aria-busy="true"><div class="empty" role="status">Loading meetings…</div></div>
+    </div>
+  </section>
+
   <!-- ================= OHANCAW ================= -->
   <section id="panel-ohancaw" class="panel" data-folio="05">
     <div class="section-pad">
@@ -713,6 +768,8 @@ const ACC_EAST_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vToNTU
 // own sheets; these protected tabs import only each team's Website output.
 const OHANCAW_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSZ0K34jl-0Y394yD6tEXhVYJdsGUMu7IkbE51taOLs9b1Eqq0dlLTOGScLk2-XnbPzRyOOKGtHGmUB/pub?gid=91626006&single=true&output=csv";
 const IDEAS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSZ0K34jl-0Y394yD6tEXhVYJdsGUMu7IkbE51taOLs9b1Eqq0dlLTOGScLk2-XnbPzRyOOKGtHGmUB/pub?gid=91626007&single=true&output=csv";
+const MEETINGS_CSV_URL = "https://docs.google.com/spreadsheets/d/1wxdzJYnK4KS1JigIzsnA03akhTeBFyqOaNEKA4_amx0/gviz/tq?tqx=out:csv&gid=21610001&headers=1";
+const GRANTS_CSV_URL = "https://docs.google.com/spreadsheets/d/1wxdzJYnK4KS1JigIzsnA03akhTeBFyqOaNEKA4_amx0/gviz/tq?tqx=out:csv&gid=21610002&headers=1";
 
 // Questions use the email composer below; no separate FAQ intake form is needed.
 
@@ -885,7 +942,9 @@ async function loadCSV(url, key, headerAnchor){
       announcements:["Title","Published"], events:["Title","Published"],
       research:["Principal Investigator","Project Description"],
       shadowing:["Name","Student 1:","Student 2:"], accEast:["Date","Time","Name (first last)"],
-      ohancaw:["Title","Published"], ideas:["Question","Published"]
+      ohancaw:["Title","Published"], ideas:["Question","Published"],
+      meetings:["Title","Deadline","When","Details","Website","FundingLink","Group","Published"],
+      grants:["Title","Deadline","When","Details","Website","FundingLink","Group","Published"]
     };
     const parsed = parseCSV(text, headerAnchor, required[key] || []);
     FEED_STATE[key] = "loaded";
@@ -1166,7 +1225,11 @@ function qaReportRequested(){
 }
 function renderQaReport(){
   if(!qaReportRequested()) return;
+  const expectedFeeds = ["announcements","events","research","shadowing","accEast","ohancaw","ideas","meetings","grants"];
   const failedFeeds = Object.entries(FEED_STATE).filter(([, s]) => s === "error").map(([k]) => k);
+  const pendingFeeds = expectedFeeds.filter(key => !FEED_STATE[key] || FEED_STATE[key] === "loading");
+  const unconfiguredFeeds = expectedFeeds.filter(key => FEED_STATE[key] === "unconfigured");
+  const feedLabel = key => key === "grants" ? "funding opportunities" : key;
   const esc2 = esc;
 
   const section = (title, body) => body ? `<h3>${esc2(title)}</h3>${body}` : "";
@@ -1178,9 +1241,11 @@ function renderQaReport(){
       <li><b>${esc2(f.field)}</b> — “${esc2(f.from)}” shows as typed, and is filtered together with “${esc2(f.to)}”<br>
       <span class="qa-where">${esc2(f.section)} · ${esc2(f.row)}</span></li>`).join("")}</ul>` : "";
   const config = VOCAB_CONFIG_ISSUES.length ? `<ul>${VOCAB_CONFIG_ISSUES.map(c => `<li>${esc2(c)}</li>`).join("")}</ul>` : "";
-  const feeds = failedFeeds.length ? `<ul>${failedFeeds.map(f => `<li>The <b>${esc2(f)}</b> sheet did not load — check that it is still published to the web.</li>`).join("")}</ul>` : "";
+  const feeds = failedFeeds.length ? `<ul>${failedFeeds.map(f => `<li>The <b>${esc2(feedLabel(f))}</b> sheet did not load — ${["meetings","grants"].includes(f) ? "check that its source sheet still allows anyone with the link to access it and that its website-output tab is available." : "check that it is still published to the web."}</li>`).join("")}</ul>` : "";
+  const pending = pendingFeeds.length ? `<p>Still loading: ${pendingFeeds.map(key => esc2(feedLabel(key))).join(", ")}. The sheet check is not complete yet.</p>` : "";
+  const unconfigured = unconfiguredFeeds.length ? `<p>No feed is configured for: ${unconfiguredFeeds.map(key => esc2(feedLabel(key))).join(", ")}.</p>` : "";
 
-  const clean = !VOCAB_ISSUES.length && !VOCAB_FIXES.length && !VOCAB_CONFIG_ISSUES.length && !failedFeeds.length;
+  const clean = !VOCAB_ISSUES.length && !VOCAB_FIXES.length && !VOCAB_CONFIG_ISSUES.length && expectedFeeds.every(key => FEED_STATE[key] === "loaded");
 
   const panel = document.createElement("div");
   panel.className = "qa-panel";
@@ -1197,6 +1262,8 @@ function renderQaReport(){
       ${section("Needs attention in the sheet", issues)}
       ${section("Grouped together in the filters", fixes)}
       ${section("Sheets that did not load", feeds)}
+      ${section("Sheets still loading", pending)}
+      ${section("Missing feed settings", unconfigured)}
       ${section("Vocabulary configuration", config)}
       <p class="qa-foot">This checks public website data only; it is not a private administrator page. Remove <code>?check=1</code> from the URL for the normal site.</p>
     </div>`;
@@ -1717,6 +1784,162 @@ function renderIdeas(){
   `).join("");
 }
 
+/* ---------------- Meetings & Funding Opportunities ---------------- */
+// These feeds load independently so an unavailable new sheet cannot hold up
+// announcements, research, shadowing, or the other existing sections.
+const OPPORTUNITY_DATA = {meetings:[], grants:[]};
+let opportunityKind = "meetings";
+let meetingScope = "all";
+let opportunityRequestId = 0;
+window.entOpportunityCallbacks = Object.create(null);
+
+// Google Sheets supports script callbacks for public data sources. Its normal
+// gviz CSV response has no CORS header, so fetch() cannot read it from this site.
+function loadOpportunityRows(feedUrl){
+  return new Promise((resolve, reject) => {
+    const url = new URL(feedUrl);
+    if(url.origin !== "https://docs.google.com" || !/^\/spreadsheets\/d\/[^/]+\/gviz\/tq$/.test(url.pathname)){
+      reject(new Error("Invalid opportunity feed")); return;
+    }
+    const key = `request${++opportunityRequestId}`;
+    const script = document.createElement("script");
+    let finished = false;
+    const finish = (error, rows) => {
+      if(finished) return;
+      finished = true;
+      clearTimeout(timer);
+      script.remove();
+      // Keep a harmless callback for a response that arrives after timeout.
+      window.entOpportunityCallbacks[key] = () => {};
+      if(error) reject(error); else resolve(rows);
+    };
+    const timer = setTimeout(() => finish(new Error("Opportunity feed timed out")), 12000);
+    window.entOpportunityCallbacks[key] = response => {
+      try {
+        if(response.status !== "ok" || !response.table) throw new Error("Opportunity feed unavailable");
+        const fields = ["Title","Deadline","When","Details","Website","FundingLink","Group","Published"];
+        const columns = response.table.cols.map(column => column.label);
+        if(fields.some(field => !columns.includes(field))) throw new Error("Opportunity columns changed");
+        const rows = (response.table.rows || []).map(row => {
+          const result = {};
+          fields.forEach(field => {
+            const cell = row.c[columns.indexOf(field)];
+            result[field] = String(cell?.f ?? cell?.v ?? "").trim();
+          });
+          return result;
+        });
+        finish(null, rows);
+      } catch(error) { finish(error); }
+    };
+    url.searchParams.set("tqx", `out:json;responseHandler:entOpportunityCallbacks.${key}`);
+    url.searchParams.set("tq", "select A,B,C,D,E,F,G,H where H = 'Yes'");
+    script.src = url.href;
+    script.async = true;
+    script.referrerPolicy = "no-referrer";
+    script.onerror = () => finish(new Error("Opportunity feed could not be reached"));
+    document.head.appendChild(script);
+  });
+}
+
+function publishedOpportunities(kind){
+  return OPPORTUNITY_DATA[kind].filter(r => isYes(r.Published) && r.Title);
+}
+function opportunityGroupLabel(group){
+  if(group === "National Meetings") return "National/International";
+  if(group === "Grants") return "Funding opportunities";
+  return group;
+}
+function setOpportunityKind(kind){
+  if(kind !== "meetings" && kind !== "grants") return;
+  opportunityKind = kind;
+  document.querySelectorAll("#panel-meetings [data-opportunity-kind]").forEach(button => {
+    button.setAttribute("aria-pressed", String(button.dataset.opportunityKind === kind));
+  });
+  document.getElementById("meeting-scope").hidden = kind !== "meetings";
+  const search = document.getElementById("opportunity-search");
+  search.value = "";
+  const label = kind === "meetings" ? "meetings" : "funding opportunities";
+  search.setAttribute("aria-label", `Search ${label}`);
+  search.placeholder = `Search ${label}…`;
+  renderMeetingsGrants();
+}
+function renderMeetingsGrants(){
+  const kind = opportunityKind;
+  const isMeeting = kind === "meetings";
+  const label = isMeeting ? "meetings" : "funding opportunities";
+  const wrap = document.getElementById("opportunity-list");
+  const count = document.getElementById("opportunity-count");
+  const state = FEED_STATE[kind];
+  const loading = !state || state === "loading";
+  wrap.setAttribute("aria-busy", String(loading));
+  if(loading){
+    count.textContent = `Loading ${label}…`;
+    wrap.innerHTML = `<div class="empty">Loading ${label}…</div>`;
+    return;
+  }
+  if(state === "error"){
+    count.textContent = `${isMeeting ? "Meetings" : "Funding opportunities"} are temporarily unavailable.`;
+    wrap.innerHTML = `<div class="empty"><p>The ${label} list could not be loaded. Try again or open the source sheet.</p><div class="opportunity-recovery"><button type="button" class="btn-outline" data-opportunity-retry="${kind}">Try again</button><a class="btn-outline" href="https://docs.google.com/spreadsheets/d/1wxdzJYnK4KS1JigIzsnA03akhTeBFyqOaNEKA4_amx0/edit" target="_blank" rel="noopener noreferrer">Open source sheet</a></div></div>`;
+    return;
+  }
+  const query = document.getElementById("opportunity-search").value.trim().toLowerCase();
+  const available = publishedOpportunities(kind).filter(r => !isMeeting || meetingScope === "all" || opportunityGroupLabel(r.Group) === meetingScope);
+  const rows = available.filter(r => !query || [r.Title,r.Deadline,r.When,r.Details,opportunityGroupLabel(r.Group)].join(" ").toLowerCase().includes(query));
+  const countLabel = isMeeting ? (rows.length === 1 ? "meeting" : "meetings") : (rows.length === 1 ? "funding opportunity" : "funding opportunities");
+  count.textContent = `${rows.length} ${countLabel}${query ? ` matching “${document.getElementById("opportunity-search").value.trim()}”` : ""}${isMeeting && meetingScope !== "all" ? ` · ${meetingScope === "National/International" ? "National/International" : "University of Miami"}` : ""}`;
+  if(!rows.length){
+    wrap.innerHTML = `<div class="empty">${query ? "No matches. Try a different search." : `No ${label} are listed${isMeeting && meetingScope !== "all" ? " in this scope" : ""} yet.`}</div>`;
+    return;
+  }
+  wrap.innerHTML = rows.map(r => `
+    <article class="opportunity-item">
+      <div class="opportunity-overview">
+        <div><h3 tabindex="-1">${esc(r.Title)}</h3>${r.Group ? `<p class="opportunity-group">${esc(opportunityGroupLabel(r.Group))}</p>` : ""}</div>
+        <dl class="opportunity-facts">
+          <div><dt>${isMeeting ? "Meeting date" : "Use"}</dt><dd>${esc(r.When || "Not listed")}</dd></div>
+          <div><dt>${isMeeting ? "Abstract deadline" : "Deadline"}</dt><dd>${esc(r.Deadline || "Not listed")}</dd></div>
+        </dl>
+      </div>
+      ${isMeeting && (r.Details || sanitizeUrl(r.FundingLink)) ? `<details class="opportunity-funding"><summary>Funding details</summary>${r.Details ? `<p class="opportunity-details">${esc(r.Details)}</p>` : ""}${sanitizeUrl(r.FundingLink) ? `<div class="opportunity-actions">${linkButton(r.FundingLink,"Funding website")}</div>` : ""}</details>` : ""}
+      ${!isMeeting && r.Details ? `<p class="opportunity-details">${esc(r.Details)}</p>` : ""}
+      ${sanitizeUrl(r.Website) || (!isMeeting && sanitizeUrl(r.FundingLink)) ? `<div class="opportunity-actions">${linkButton(r.Website,isMeeting ? "Meeting website" : "Funding website")}${!isMeeting && sanitizeUrl(r.FundingLink) !== sanitizeUrl(r.Website) ? linkButton(r.FundingLink,"Application / instructions") : ""}</div>` : ""}
+    </article>
+  `).join("");
+}
+async function loadOpportunityFeed(kind){
+  if(FEED_STATE[kind] === "loading") return;
+  FEED_STATE[kind] = "loading";
+  if(kind === opportunityKind) renderMeetingsGrants();
+  try {
+    OPPORTUNITY_DATA[kind] = await loadOpportunityRows(kind === "meetings" ? MEETINGS_CSV_URL : GRANTS_CSV_URL);
+    FEED_STATE[kind] = "loaded";
+  } catch {
+    OPPORTUNITY_DATA[kind] = [];
+    FEED_STATE[kind] = "error";
+  }
+  if(kind === opportunityKind) renderMeetingsGrants();
+  buildSearchIndex();
+  if(document.getElementById("cmdk-overlay").classList.contains("open")) renderCmdkResults(document.getElementById("cmdk-input").value);
+}
+function setupMeetingsGrants(){
+  document.querySelectorAll("#panel-meetings [data-opportunity-kind]").forEach(button => {
+    button.addEventListener("click", () => setOpportunityKind(button.dataset.opportunityKind));
+  });
+  document.querySelectorAll("[data-meeting-scope]").forEach(button => {
+    button.addEventListener("click", () => {
+      meetingScope = button.dataset.meetingScope;
+      document.querySelectorAll("[data-meeting-scope]").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+      renderMeetingsGrants();
+    });
+  });
+  document.getElementById("opportunity-search").addEventListener("input", renderMeetingsGrants);
+  document.getElementById("opportunity-list").addEventListener("click", event => {
+    const retry = event.target.closest("[data-opportunity-retry]");
+    if(retry) loadOpportunityFeed(retry.dataset.opportunityRetry);
+  });
+  return Promise.all([loadOpportunityFeed("meetings"), loadOpportunityFeed("grants")]);
+}
+
 /* ---------------- FAQ ---------------- */
 function renderFAQ(){
   const wrap = document.getElementById("faq-list");
@@ -1796,6 +2019,11 @@ function buildSearchIndex(){
   DATA.ideas.filter(r => isYes(r.Published)).forEach(r => {
     SEARCH_INDEX.push({section:"Ideas & Q&A", panel:"ideas", title:r.Question||"Untitled", sub:truncate(r.Answer,90)});
   });
+  ["meetings","grants"].forEach(kind => {
+    publishedOpportunities(kind).forEach(r => {
+      SEARCH_INDEX.push({section:kind === "meetings" ? "Meetings" : "Funding opportunities", panel:"meetings", opportunityKind:kind, title:r.Title, sub:truncate([r.Deadline,r.When,r.Details].filter(Boolean).join(" · "),90)});
+    });
+  });
   FAQ_ITEMS.forEach(f => {
     SEARCH_INDEX.push({section:"FAQ", panel:"faq", title:f.q, sub:truncate(f.a,90)});
   });
@@ -1838,7 +2066,7 @@ function renderCmdkResults(query){
   wrap.innerHTML = results.map((r, i) => {
     let header = "";
     if(r.section !== lastSection){ header = `<div class="cmdk-group">${esc(r.section)}</div>`; lastSection = r.section; }
-    return `${header}<button class="cmdk-item ${i===0?'active':''}" data-panel="${r.panel}" data-i="${i}"><div class="cmdk-item-title">${esc(r.title)}</div>${r.sub ? `<div class="cmdk-item-sub">${esc(r.sub)}</div>` : ""}</button>`;
+    return `${header}<button class="cmdk-item ${i===0?'active':''}" data-panel="${r.panel}"${r.opportunityKind ? ` data-opportunity-kind="${r.opportunityKind}"` : ""} data-i="${i}"><div class="cmdk-item-title">${esc(r.title)}</div>${r.sub ? `<div class="cmdk-item-sub">${esc(r.sub)}</div>` : ""}</button>`;
   }).join("");
 }
 function cmdkSetActive(i){
@@ -1886,8 +2114,20 @@ cmdkInput.addEventListener("input", () => renderCmdkResults(cmdkInput.value));
 document.getElementById("cmdk-results").addEventListener("click", (e) => {
   const item = e.target.closest(".cmdk-item");
   if(!item) return;
+  const opportunityTitle = item.dataset.opportunityKind ? item.querySelector(".cmdk-item-title").textContent : "";
+  if(item.dataset.opportunityKind){
+    meetingScope = "all";
+    document.querySelectorAll("[data-meeting-scope]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.meetingScope === "all")));
+    setOpportunityKind(item.dataset.opportunityKind);
+    document.getElementById("opportunity-search").value = opportunityTitle;
+    renderMeetingsGrants();
+  }
   switchPanel(item.dataset.panel);
   closeCmdk();
+  if(opportunityTitle){
+    const heading = [...document.querySelectorAll("#opportunity-list h3")].find(el => el.textContent === opportunityTitle);
+    if(heading) heading.focus();
+  }
 });
 document.addEventListener("keydown", (e) => {
   const isOpen = cmdkOverlay.classList.contains("open");
@@ -1903,7 +2143,7 @@ document.addEventListener("keydown", (e) => {
   if(e.key === "Enter" && document.activeElement === cmdkInput){
     e.preventDefault();
     const active = document.querySelector(".cmdk-item.active");
-    if(active){ switchPanel(active.dataset.panel); closeCmdk(); }
+    if(active) active.click();
   }
 });
 
@@ -1911,8 +2151,8 @@ document.addEventListener("keydown", (e) => {
 function scrollToTop(){ window.scrollTo({top:0, behavior:"instant"}); }
 
 /* ---------------- Nav / routing ---------------- */
-const PANELS = ["announcements","events","research","shadowing","ohancaw","ideas","faq","contact"];
-const GET_INVOLVED_PANELS = ["research","shadowing","ohancaw"];
+const PANELS = ["announcements","events","research","shadowing","meetings","ohancaw","ideas","faq","contact"];
+const GET_INVOLVED_PANELS = ["research","shadowing","meetings","ohancaw"];
 
 const PANEL_META = {
   announcements: { num:"01", doc:"Announcements", titleA:"Your next step", titleB:"in ENT.", split:true, sub:"The ENT Interest Group at the University of Miami Miller School of Medicine. Find your next research project, step into clinic, and stay connected with the ENT community here.", showStats:true },
@@ -1933,6 +2173,7 @@ const PANEL_META = {
                      const n = DATA.shadowing.filter(r => openSlotCount(r) > 0).length;
                      return n ? `${n} attending${n===1?"":"s"} open to shadows now` : "Nothing open right now — check back soon.";
                    } },
+  meetings:      { num:"09", doc:"Meetings & Funding Opportunities", titleA:"Meetings &", titleB:"funding opportunities.", sub:"Find conferences, abstract deadlines, and funding options for your next presentation.", showStats:false },
   ohancaw:       { num:"05", doc:"OHANCAW", titleA:"Awareness,", titleB:"not silence.", sub:"Oral, Head & Neck Cancer Awareness Week — details post here as they're confirmed, closer to the event.", showStats:false },
   ideas:         { num:"06", doc:"Ideas & Q&A", titleA:"Got an", titleB:"idea?", sub:"Answers are reviewed before they appear publicly.", showStats:false },
   faq:           { num:"07", doc:"FAQ", titleA:"Your", titleB:"questions.", sub:"Click a question below to expand it.", showStats:false },
@@ -2063,6 +2304,7 @@ document.addEventListener("keydown", (e) => {
 (async function init(){
   loadSaved();
   setupStudentNetwork();
+  const opportunityFeedsReady = setupMeetingsGrants();
 
   const loadingBar = document.getElementById("loading-bar");
   loadingBar.style.width = "35%";
@@ -2113,10 +2355,6 @@ document.addEventListener("keydown", (e) => {
 
   switchPanel((window.location.hash || "#announcements").slice(1));
 
-  // After switchPanel, which moves focus to the page title — otherwise the
-  // report opens without keyboard focus landing inside it.
-  renderQaReport();   // no-op unless ?check=1 is in the URL
-
   document.getElementById("research-search").addEventListener("input", renderResearch);
   document.getElementById("research-recruiting-only").addEventListener("change", renderResearch);
   document.getElementById("research-chandler-only").addEventListener("change", renderResearch);
@@ -2124,6 +2362,13 @@ document.addEventListener("keydown", (e) => {
   document.getElementById("shadow-search").addEventListener("input", renderShadowing);
   document.getElementById("shadow-open-only").addEventListener("change", renderShadowing);
   document.getElementById("shadow-saved-only").addEventListener("change", renderShadowing);
+
+  // The normal site and its controls are ready independently. Only the optional
+  // sheet-check report waits for both additional feeds before claiming success.
+  if(qaReportRequested()){
+    await opportunityFeedsReady;
+    renderQaReport();
+  }
 })();
 
 </script>
